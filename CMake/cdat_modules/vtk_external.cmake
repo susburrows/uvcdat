@@ -1,6 +1,3 @@
-
-# If Windows we use CMake otherwise ./configure
-
 set(vtk_source "${CMAKE_CURRENT_BINARY_DIR}/vtk")
 set(vtk_binary "${CMAKE_CURRENT_BINARY_DIR}/vtk-build")
 set(vtk_install "${cdat_EXTERNALS}")
@@ -10,8 +7,7 @@ ExternalProject_Add(vtk
   SOURCE_DIR ${vtk_source}
   BINARY_DIR ${vtk_build}
   INSTALL_DIR ${vtk_install}
-  URL ${VTK_URL}/${VTK_GZ}
-  URL_MD5 ${VTK_MD5}
+  GIT_REPOSITORY ${VTK_URL}
   PATCH_COMMAND ""
   CMAKE_CACHE_ARGS
     -DBUILD_SHARED_LIBS:BOOL=ON
