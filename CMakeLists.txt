@@ -83,7 +83,7 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES_M "64" CACHE STRING "" FORCE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "${OSX_VER_MAJOR}.${OSX_VER_MINOR}" CACHE STRING "" FORCE)
   endif()
-  
+
   # Support only 10.6 or higher for now
   if(IS_DIRECTORY "/Developer/SDKs/MacOSX10.6.sdk")
     set(HAVE_10_6_SDK TRUE)
@@ -205,7 +205,7 @@ endif(CMAKE_Fortran_COMPILER)
 set(PARTS_BUILT_INFO "${cdat_BINARY_DIR}/build_info.txt" CACHE STRING "File where to store build infos" FORCE)
 option(CDAT_BUILD_PARALLEL "Build parallel components of CDAT" ON)
 #OPtion to choose between easy_install and pip (crunchy ssl/man in the middle prevents us to use pip here...
-set(EGG_INSTALLER "PIP" CACHE STRING "Which package installer to use") 
+set(EGG_INSTALLER "PIP" CACHE STRING "Which package installer to use")
 set_property(CACHE EGG_INSTALLER PROPERTY STRINGS "PIP" "EASY_INSTALL")
 set(PIP_CERTIFICATE "" CACHE STRING "Certificate to use for PIP (LLNL issue really)")
 #Options for various types of builds
@@ -331,6 +331,8 @@ set(external_packages)
 set(found_system_include_dirs)
 set(found_system_libraries)
 
+# Include packages
+#-----------------------------------------------------------------------------
 include(vtk_pkg)
 
 # Configure custom configure/build/install step files
