@@ -176,9 +176,9 @@ macro(create_package_and_groups)
         set(_transient_build_package_${lc_package_name} ${_build_package_${lc_package_name}})
 
         # Append this package to the global list for all of the packages
-        # that will be built by this instance
+        # so that it can be build by this instance
         list(FIND _external_packages "${package_name}" found_package)
-        if("${found_package}"  STREQUAL "-1")
+        if("${found_package}"  STREQUAL "-1" AND SB_BUILD_${uc_package_name})
           list(APPEND _external_packages "${package_name}")
         endif()
       endforeach()
