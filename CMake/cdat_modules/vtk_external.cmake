@@ -1,5 +1,5 @@
-set(vtk_source "${CMAKE_CURRENT_BINARY_DIR}/vtk")
-set(vtk_binary "${CMAKE_CURRENT_BINARY_DIR}/vtk-build")
+set(vtk_source "${CMAKE_CURRENT_BINARY_DIR}/build/vtk")
+set(vtk_binary "${CMAKE_CURRENT_BINARY_DIR}/build/vtk-build")
 set(vtk_install "${cdat_EXTERNALS}")
 
 ExternalProject_Add(vtk
