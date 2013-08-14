@@ -11,4 +11,4 @@ set(PYQT_GZ_UNIX PyQt-x11-gpl-${PYQT_VERSION}.tar.gz)
 set(PYQT_MD5_APPLE f8feb678212cf4f84d5cf5317b1f5bc2 )
 set(PYQT_MD5_UNIX e5973c4ec0b0469f329bc00209d2ad9c )
 
-add_cdat_package_dependent(PyQt "" "" ON "CDAT_BUILD_GRAPHICS" OFF)
+add_sb_package(NAME PyQt GROUPS "GRAPHICS" DEFAULT ON)

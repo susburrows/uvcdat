@@ -9,7 +9,7 @@ execute_process(
     OUTPUT_VARIABLE ver
     )
 
-if (NOT ${res} EQUAL 0) 
+if (NOT ${res} EQUAL 0)
     set(cdat_VERSION ${cdat_VERSION_MAJOR}.${cdat_VERSION_MINOR}.${cdat_VERSION_PATCH})
     message("Couldn't get version from git setting from values in cdat_pkg.cmake ${cdat_VERSION}")
 else ()
@@ -27,5 +27,5 @@ configure_file(${cdat_CMAKE_SOURCE_DIR}/cdat_modules_extra/version.in
   @ONLY
 )
 
-add_cdat_package(CDAT "" "" "")
+add_sb_package(NAME CDAT GROUPS "CLIMATE" DEFAULT ON)
 

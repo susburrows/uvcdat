@@ -11,5 +11,5 @@ set(NUMPY_MD5 0ab72b3b83528a7ae79c6df9042d61c6 )
 set (nm NUMPY)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
-add_cdat_package(NUMPY "" "" "")
-set(NUMPY ${pkgconfig_pkg} ${python_pkg} ${clapack_pkg} ${lapack_pkg})
+
+add_sb_package(NAME NUMPY GROUPS "PYTHON" DEFAULT ON)

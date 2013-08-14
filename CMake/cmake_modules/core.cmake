@@ -78,6 +78,7 @@ function(add_sb_package)
 
   # Define a variable that could be used to define dependencies
   set(${lc_package_name}_pkg "${_name}")
+  set(${lc_package_name}_pkg "${_name}" PARENT_SCOPE)
 
   # Store the initial state for packages
   set(_use_system_${lc_package_name})
@@ -138,6 +139,11 @@ function(add_sb_package)
 
   option(SB_USE_SYSTEM_${uc_package_name} "${message}" ${_use_system_${lc_package_name}})
   mark_as_advanced(SB_USE_SYSTEM_${uc_package_name})
+
+  # TODO Check here if use system is ON then verify it exists and if not
+  # throw an error. Also check if both are ON. If both are ON, then build
+  # wins. Both are off is Ok as we can turn it ON if some other package needs
+  # it.
 endfunction()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -145,19 +151,34 @@ endfunction()
 # Function to create the superbuild
 #
 #/////////////////////////////////////////////////////////////////////////////
-function(execute)
+macro(_execute)
   set(_external_packages)
-  create_package_and_groups()
-  resolve_package_dependencies()
-  create_build_list()
-endfunction()
+  _create_package_and_groups()
+  _resolve_package_dependencies()
+  _create_build_list()
+endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
 #
 # Helper macro to gather list of packages and groups
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro(create_package_and_groups)
+macro(_add_or_remove_external_package package_name)
+  # Check if the package already exists in the list of external packages
+  list(FIND _external_packages "${package_name}" found_package)
+
+  # If yes, and if we need to build it, add it to the list
+  if("${found_package}"  STREQUAL "-1" AND SB_BUILD_${uc_package_name})
+    list(APPEND _external_packages "${package_name}")
+  endif()
+
+  # If yes, and if don't need to build it, then remove it from the list
+  if(NOT "${found_package}" STREQUAL "-1" AND NOT SB_BUILD_${uc_package_name})
+    list(REMOVE _external_packages "${package_name}")
+  endif()
+endmacro()
+
+macro(_create_package_and_groups)
   foreach(group ${_group_names})
     message("[sb:debug] Group is ${group} with pkgs ${_${group}_pkgs}")
     option(SB_ENABLE_${group} "Enable group ${group}" ON)
@@ -175,12 +196,8 @@ macro(create_package_and_groups)
         set(_transient_use_system_${lc_package_name} ${_use_system_${lc_package_name}})
         set(_transient_build_package_${lc_package_name} ${_build_package_${lc_package_name}})
 
-        # Append this package to the global list for all of the packages
-        # so that it can be build by this instance
-        list(FIND _external_packages "${package_name}" found_package)
-        if("${found_package}"  STREQUAL "-1" AND SB_BUILD_${uc_package_name})
-          list(APPEND _external_packages "${package_name}")
-        endif()
+        _add_or_remove_external_package(${package_name})
+
       endforeach()
     else()
       foreach(package_name ${_${group}_pkgs})
@@ -204,23 +221,41 @@ endmacro()
 # Resolve package dependencies
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro(resolve_package_dependencies)
-  include(TopologicalSort)
-  message("[sb:debug] Packages: ${_external_packages}")
+macro(_resolve_package_dependencies)
+  message("[sb:debug] _resolve_package_dependencies: ${_external_packages}")
   foreach(package_name ${_external_packages})
     string(TOLOWER ${package_name} lc_package_name)
     include("${lc_package_name}_deps")
   endforeach()
 
-  topological_sort(_external_packages "" "_deps")
-
   foreach(package_name ${_external_packages})
-    do_resolve_package_deps(${package_name})
+    _do_resolve_package_deps(${package_name})
   endforeach()
+
+  include(TopologicalSort)
+  topological_sort(_external_packages "" "_deps")
 endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
-macro(do_resolve_package_deps package_name)
+macro(_enable_sb_package package_name)
+  string(TOUPPER ${package_name} uc_package_name)
+  string(TOLOWER ${package_name} lc_package_name)
+
+  # Enable the package
+  set(SB_BUILD_${uc_package_name} ON CACHE BOOL "" FORCE)
+
+  # Add this package to the list
+  _add_or_remove_external_package(package_name)
+
+  # Include package dependencies
+  include("${lc_package_name}_deps")
+
+  # Resolve dependency for this package now
+  _do_resolve_package_deps(${package_name})
+endmacro()
+
+#/////////////////////////////////////////////////////////////////////////////
+macro(_do_resolve_package_deps package_name)
   message("PACKAGE NAME ${package_name}")
   string(TOUPPER ${package_name} uc_package_name)
   string(TOLOWER ${package_name} lc_package_name)
@@ -228,11 +263,11 @@ macro(do_resolve_package_deps package_name)
   message("${SB_BUILD_${uc_package_name}}")
 
   if(SB_BUILD_${uc_package_name})
-    foreach(dep ${${package_name}_deps})
-      string(TOUPPER ${dep} uc_dep)
-      if(NOT SB_USE_SYSTEM_${uc_dep} AND NOT SB_BUILD_${uc_dep})
-        set(SB_BUILD_${uc_dep} ON CACHE BOOL "" FORCE)
-        message("[sb:info] Setting build package -- ${dep} ON -- as required by ${package_name}")
+    foreach(dep_package_name ${${package_name}_deps})
+      string(TOUPPER ${dep_package_name} uc_dep_package_name)
+      if(NOT SB_USE_SYSTEM_${uc_dep} AND NOT SB_BUILD_${uc_dep_package_name})
+        _enable_sb_package(${uc_dep_package_name})
+        message("[sb:info] Setting build package -- ${dep_package_name} ON -- as required by ${package_name}")
       endif()
     endforeach()
   endif()
@@ -243,7 +278,7 @@ endmacro()
 # Create final build list
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro(create_build_list)
+macro(_create_build_list)
 foreach(package ${_external_packages})
   string(TOLOWER ${package} lc_package)
   string(TOUPPER ${package} uc_package)

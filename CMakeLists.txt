@@ -335,6 +335,18 @@ set(found_system_libraries)
 
 # Include packages
 #-----------------------------------------------------------------------------
+include(pkgconfig_pkg)
+include(cmor_pkg)
+include(pyqt_pkg)
+include(numpy_pkg)
+include(pmw_pkg)
+include(jasper_pkg)
+include(g2clib_pkg)
+include(ffmpeg_pkg)
+include(pixman_pkg)
+include(tiff_pkg)
+include(libcf_pkg)
+include(python_pkg)
 include(cdat_pkg)
 include(vtk_pkg)
 
@@ -377,7 +389,7 @@ configure_file(${cdat_CMAKE_SOURCE_DIR}/cdat_modules_extra/cdat_configure_step.c
 
 # Now sort and include external packages
 #-----------------------------------------------------------------------------
-execute()
+_execute()
 
 file(WRITE ${PARTS_BUILT_INFO} ${packages_info})
 # Construct Include and Link variables

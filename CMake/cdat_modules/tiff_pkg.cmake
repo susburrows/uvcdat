@@ -8,4 +8,5 @@ set(TIFF_MD5 2006c1bdd12644dbf02956955175afd6)
 set (nm TIFF)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR}.${${nm}_MINOR}.${${nm}_PATCH})
-add_cdat_package_dependent(tiff "" "" ON "CDAT_BUILD_GRAPHICS" OFF)
+
+add_sb_package(NAME tiff GROUPS "GRAPHICS" DEFAULT ON)
