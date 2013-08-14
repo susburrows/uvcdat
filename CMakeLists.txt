@@ -374,29 +374,8 @@ configure_file(${cdat_CMAKE_SOURCE_DIR}/cdat_modules_extra/cdat_configure_step.c
 
 # Now sort and include external packages
 #-----------------------------------------------------------------------------
-include(TopologicalSort)
-message("[DEBUG] packages ${external_packages}")
-foreach(package ${external_packages})
-  string(TOLOWER ${package} lc_package)
-  include("${lc_package}_deps")
-endforeach()
+execute()
 
-topological_sort(external_packages "" "_deps")
-
-foreach(package ${external_packages})
-  enable_cdat_package_deps(${package})
-endforeach()
-
-foreach(package ${external_packages})
-  string(TOLOWER ${package} lc_package)
-  string(TOUPPER ${package} uc_package)
-
-  if(CDAT_BUILD_${uc_package})
-    message("[INFO] Package --- ${package} --- will be built")
-    list(APPEND packages_info "${package} ${${uc_package}_VERSION}\n")
-    include("${lc_package}_external")
-  endif()
-endforeach()
 file(WRITE ${PARTS_BUILT_INFO} ${packages_info})
 # Construct Include and Link variables
 #-----------------------------------------------------------------------------

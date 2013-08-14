@@ -73,21 +73,27 @@ function(add_sb_package)
   message("default is ${_default}")
 
   # Create convenient names
-  string(TOUPPER ${_name} _uc_package_name)
-  string(TOLOWER ${_name} _lc_package_name)
-  set(_use_system_${_lc_package_name} PARENT_SCOPE)
-  set(_build_package_${_lc_package_name} PARENT_SCOPE)
+  string(TOUPPER ${_name} uc_package_name)
+  string(TOLOWER ${_name} lc_package_name)
 
-  set(_use_system_${_lc_package_name} OFF)
-  set(_build_package_${_lc_package_name} ON)
+  # Store the initial state for packages
+  set(_use_system_${lc_package_name})
+  set(_build_package_${lc_package_name})
 
-  if ("${_default}" STREQUAL "ON")
-    set(_build_package_${_lc_package_name} ON)
-  elif ("${_default}" STREQUAL "OFF")
-    set(_build_package_${_lc_package_name} OFF)
-  elif ("${_default}" STREQUAL "SYSTEM")
-    set(_use_system_${_lc_package_name} ON)
-    set(_build_package_${_lc_package_name} OFF)
+  # Create a place holder to store transient state of the packages
+  set(_transient_use_system_${lc_package_name} PARENT_SCOPE)
+  set(_transient_build_package_${lc_package_name} PARENT_SCOPE)
+
+  set(_use_system_${lc_package_name} OFF)
+  set(_build_package_${lc_package_name} ON)
+
+  if("${_default}" STREQUAL "ON")
+    set(_build_package_${lc_package_name} ON)
+  elseif("${_default}" STREQUAL "OFF")
+    set(_build_package_${lc_package_name} OFF)
+  elseif("${_default}" STREQUAL "SYSTEM")
+    set(_use_system_${lc_package_name} ON)
+    set(_build_package_${lc_package_name} OFF)
   endif()
 
   # Find all the groups this package belongs to and then
@@ -121,11 +127,14 @@ function(add_sb_package)
     message("[sb:debug] group pkgs ${_${group}_pkgs}")
   endforeach()
 
-  option(SB_BUILD_${_uc_package_name} "${message}" ${_build_package_${_lc_package_name}})
-  mark_as_advanced(SB_BUILD_${_uc_package_name})
+  set(_use_system_${lc_package_name} ${_use_system_${lc_package_name}} PARENT_SCOPE)
+  set(_build_package_${lc_package_name} ${_build_package_${lc_package_name}} PARENT_SCOPE)
 
-  option(SB_USE_SYSTEM_${_uc_package_name} "${message}" ${_use_system_${_lc_package_name}})
-  mark_as_advanced(SB_USE_SYSTEM_${_uc_package_name})
+  option(SB_BUILD_${uc_package_name} "${message}" ${_build_package_${lc_package_name}})
+  mark_as_advanced(SB_BUILD_${uc_package_name})
+
+  option(SB_USE_SYSTEM_${uc_package_name} "${message}" ${_use_system_${lc_package_name}})
+  mark_as_advanced(SB_USE_SYSTEM_${uc_package_name})
 endfunction()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -133,7 +142,7 @@ endfunction()
 # Function to create the superbuild
 #
 #/////////////////////////////////////////////////////////////////////////////
-function execute()
+function(execute)
   set(_external_packages)
   create_package_and_groups()
   resolve_package_dependencies()
@@ -145,7 +154,7 @@ endfunction()
 # Helper macro to gather list of packages and groups
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro create_package_and_groups()
+macro(create_package_and_groups)
   foreach(group ${_group_names})
     message("[sb:debug] Group is ${group} with pkgs ${_${group}_pkgs}")
     option(SB_ENABLE_${group} "Enable group ${group}" ON)
@@ -153,19 +162,33 @@ macro create_package_and_groups()
     # If a group is ON, then eanble all of its packages or else don't build
     # any of its packages (unless this is overriden by dependency walker.
     if (SB_ENABLE_${group})
-      foreach(package ${_${group}_pkgs})
-        set_property(CACHE SB_USE_SYSTEM_${uc_package} PROPERTY VALUE ${_use_system_${_lc_package_name}})
-        set_property(CACHE SB_BUILD_${uc_package} PROPERTY VALUE ${_build_package_${_lc_package_name}})
+      foreach(package_name ${_${group}_pkgs})
+        string(TOUPPER ${package_name} uc_package_name)
+        string(TOLOWER ${package_name} lc_package_name)
+
+        set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE ${_use_system_${lc_package_name}})
+        set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ${_build_package_${lc_package_name}})
+
+        set(_transient_use_system_${lc_package_name} ${_use_system_${lc_package_name}})
+        set(_transient_build_package_${lc_package_name} ${_build_package_${lc_package_name}})
 
         # Append this package to the global list for all of the packages
         # that will be built by this instance
         # TODO Check if the package already exists
-        list(APPEND _external_packages "${package}")
+        list(APPEND _external_packages "${package_name}")
       endforeach()
     else()
-      foreach(package ${_${group}_pkgs})
-        set_property(CACHE SB_USE_SYSTEM_${uc_package} PROPERTY VALUE OFF)
-        set_property(CACHE SB_BUILD_${uc_package} PROPERTY VALUE OFF)
+      foreach(package_name ${_${group}_pkgs})
+        string(TOUPPER ${package_name} uc_package_name)
+        string(TOLOWER ${package_name} lc_package_name)
+
+        if(DEFINED _transient_use_system_${lc_package_name} AND NOT _transient_use_system_${lc_package_name})
+          set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE OFF)
+        endif()
+
+        if(DEFINED _transient_build_package_${lc_package_name} AND NOT _transient_build_package_${lc_package_name})
+          set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
+        endif()
       endforeach()
     endif()
   endforeach()
@@ -179,31 +202,31 @@ endmacro()
 macro(resolve_package_dependencies)
   include(TopologicalSort)
   message("[sb:debug] Packages: ${_external_packages}")
-  foreach(package ${_external_packages})
-    string(TOLOWER ${package} lc_package_name)
+  foreach(package_name ${_external_packages})
+    string(TOLOWER ${package_name} lc_package_name)
     include("${lc_package_name}_deps")
   endforeach()
 
   topological_sort(_external_packages "" "_deps")
 
-  foreach(package ${_external_packages})
-    do_resolve_package_deps(${package})
+  foreach(package_name ${_external_packages})
+    do_resolve_package_deps(${package_name})
   endforeach()
 endmacro()
 
 macro(do_resolve_package_deps package_name)
+  message("PACKAGE NAME ${package_name}")
   string(TOUPPER ${package_name} uc_package_name)
   string(TOLOWER ${package_name} lc_package_name)
 
-  if (SB_BUILD_${uc_package})
+  message("${SB_BUILD_${uc_package_name}}")
+
+  if(SB_BUILD_${uc_package_name})
     foreach(dep ${${package_name}_deps})
       string(TOUPPER ${dep} uc_dep)
-      if(NOT CDAT_USE_SYSTEM_${uc_dep} AND NOT CDAT_BUILD_${uc_dep})
-        set(CDAT_BUILD_${uc_dep} ON CACHE BOOL "" FORCE)
-        message("[INFO] Setting build package -- ${dep} ON -- as required by ${package_name}")
-      endif()
-      if(NOT DEFINED CDAT_USE_SYSTEM_${uc_dep})
-        mark_as_advanced(CDAT_BUILD_${uc_dep})
+      if(NOT SB_USE_SYSTEM_${uc_dep} AND NOT SB_BUILD_${uc_dep})
+        set(SB_BUILD_${uc_dep} ON CACHE BOOL "" FORCE)
+        message("[sb:info] Setting build package -- ${dep} ON -- as required by ${package_name}")
       endif()
     endforeach()
   endif()
@@ -215,4 +238,14 @@ endmacro()
 #
 #/////////////////////////////////////////////////////////////////////////////
 macro(create_build_list)
+foreach(package ${_external_packages})
+  string(TOLOWER ${package} lc_package)
+  string(TOUPPER ${package} uc_package)
+
+  if(SB_BUILD_${uc_package})
+    message("[sb:info] Package --- ${package} --- will be built")
+    list(APPEND packages_info "${package} ${${uc_package}_VERSION}\n")
+    include("${lc_package}_external")
+  endif()
+endforeach()
 endmacro()
