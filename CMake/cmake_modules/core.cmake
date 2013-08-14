@@ -76,6 +76,9 @@ function(add_sb_package)
   string(TOUPPER ${_name} uc_package_name)
   string(TOLOWER ${_name} lc_package_name)
 
+  # Define a variable that could be used to define dependencies
+  set(${lc_package_name}_pkg "${_name}")
+
   # Store the initial state for packages
   set(_use_system_${lc_package_name})
   set(_build_package_${lc_package_name})
@@ -174,8 +177,10 @@ macro(create_package_and_groups)
 
         # Append this package to the global list for all of the packages
         # that will be built by this instance
-        # TODO Check if the package already exists
-        list(APPEND _external_packages "${package_name}")
+        list(FIND _external_packages "${package_name}" found_package)
+        if("${found_package}"  STREQUAL "-1")
+          list(APPEND _external_packages "${package_name}")
+        endif()
       endforeach()
     else()
       foreach(package_name ${_${group}_pkgs})
@@ -214,6 +219,7 @@ macro(resolve_package_dependencies)
   endforeach()
 endmacro()
 
+#/////////////////////////////////////////////////////////////////////////////
 macro(do_resolve_package_deps package_name)
   message("PACKAGE NAME ${package_name}")
   string(TOUPPER ${package_name} uc_package_name)

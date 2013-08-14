@@ -335,6 +335,7 @@ set(found_system_libraries)
 
 # Include packages
 #-----------------------------------------------------------------------------
+include(cdat_pkg)
 include(vtk_pkg)
 
 # Configure custom configure/build/install step files
