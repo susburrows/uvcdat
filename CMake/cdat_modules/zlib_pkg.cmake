@@ -18,4 +18,4 @@ set(ZLIB_VERSION ${ZLIB_MAJOR_SRC}.${ZLIB_MINOR_SRC}.${ZLIB_PATCH_SRC})
 set(ZLIB_URL ${LLNL_URL})
 set(ZLIB_GZ zlib-${ZLIB_VERSION}.tar.gz)
 
-add_cdat_package(zlib "" "" "")
+add_sb_package(NAME zlib GROUPS "SYSTEM" DEFAULT ON)

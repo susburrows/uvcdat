@@ -9,4 +9,5 @@ set(HDF5_MD5 1196e668f5592bfb50d1de162eb16cff)
 set (nm HDF5)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
-add_cdat_package(HDF5 "" "" "")
+
+add_sb_package(NAME HDF5 GROUPS SYSTEM DEFAULT ON)

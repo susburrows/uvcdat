@@ -13,4 +13,4 @@ string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 set(NETCDF_VERSION ${NC4_VERSION})
 
-add_cdat_package(NetCDF "" "" "")
+add_sb_package(NAME NetCDF GROUPS CLIMATE DEFAULT ON)

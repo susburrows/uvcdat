@@ -8,7 +8,6 @@ set(UUID_MD5 5db0d43a9022a6ebbbc25337ae28942f)
 set (nm UUID)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
-#apparently libcf needs it
-#add_cdat_package_dependent(uuid "" "" ON "CDAT_BUILD_WO_ESGF" OFF)
-add_cdat_package(uuid "" "" "")
+
+add_sb_package(NAME uuid GROUPS SYSTEM DEFAULT ON)
 
