@@ -7,7 +7,7 @@ project(cdat)
 # Disable in source build of any kind
 STRING(REGEX MATCH "${cdat_SOURCE_DIR}/" BUILDINSOURCE "${cdat_BINARY_DIR}/")
 if (BUILDINSOURCE)
-   message(FATAL_ERROR "[ERROR] CDAT requires an out of source Build")
+   message(FATAL_ERROR "[sb:error] CDAT requires an out of source Build")
 endif()
 
 # Set cdat and cmake variables
@@ -17,15 +17,11 @@ set(LLNL_URL http://uv-cdat.llnl.gov/cdat/resources)
 set(cdat_CMAKE_SOURCE_DIR ${cdat_SOURCE_DIR}/CMake)
 set(cdat_CMAKE_BINARY_DIR ${cdat_BINARY_DIR}/CMake)
 set(cdat_external_patch_dir ${cdat_SOURCE_DIR}/exsrc)
-
-if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
-  get_filename_component(cdat_ROOT_DIR ${cdat_BINARY_DIR} PATH)
-  set(CMAKE_INSTALL_PREFIX ${cdat_ROOT_DIR}/install CACHE STRING "" FORCE)
-endif()
-
+set(CMAKE_INSTALL_PREFIX ${cdat_BINARY_DIR}/install CACHE STRING "" FORCE)
 set(cdat_EXTERNALS ${CMAKE_INSTALL_PREFIX}/Externals)
 set(ENV{PATH} "${cdat_EXTERNALS}/bin:$ENV{PATH}")
-message("[INFO] We reset your path to: " $ENV{PATH})
+
+message("[sb:info] We reset your path to: " $ENV{PATH})
 
 set(CMAKE_MODULE_PATH
   ${cdat_CMAKE_SOURCE_DIR}

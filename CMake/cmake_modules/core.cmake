@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-# VTK, CDAT, NetCDF (with opendap support), NetCDF4Python, use system python
-
 #/////////////////////////////////////////////////////////////////////////////
 #
 # Marcro to extract key-value from the template
