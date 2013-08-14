@@ -138,10 +138,23 @@ function(add_sb_package)
   option(SB_USE_SYSTEM_${uc_package_name} "${message}" ${_use_system_${lc_package_name}})
   mark_as_advanced(SB_USE_SYSTEM_${uc_package_name})
 
-  # TODO Check here if use system is ON then verify it exists and if not
-  # throw an error. Also check if both are ON. If both are ON, then build
-  # wins. Both are off is Ok as we can turn it ON if some other package needs
-  # it.
+  # If both system and build are ON, then build wins
+  if (SB_USE_SYSTEM_${uc_package_name} AND SB_BUILD_${uc_package_name})
+    set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE OFF)
+  endif()
+
+  if(SB_USE_SYSTEM_${uc_package_name})
+    if(DEFINED _version)
+      find_package(${_name} ${_version})
+    else()
+      find_package(${_name})
+    endif()
+
+    if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
+      message(FATAL_ERROR "[sb:error] Unable to find sytem package ${_name}")
+    endif()
+  endif()
+
 endfunction()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -220,6 +233,17 @@ endmacro()
 #
 #/////////////////////////////////////////////////////////////////////////////
 macro(_resolve_package_dependencies)
+  # First unset variable related to packages that we are not going to build
+  # like paraview_pkg so that others won't look for it as dependency
+  foreach(package_name ${_external_packages})
+    string(TOLOWER ${package_name} lc_package_name)
+    string(TOUPPER ${package_name} uc_package_name)
+
+    if(NOT SB_BUILD_${uc_package_name})
+      unset(${${lc_package_name}_pkg})
+    endif()
+  endforeach()
+
   message("[sb:debug] _resolve_package_dependencies: ${_external_packages}")
   foreach(package_name ${_external_packages})
     string(TOLOWER ${package_name} lc_package_name)
@@ -240,7 +264,7 @@ macro(_enable_sb_package package_name)
   string(TOLOWER ${package_name} lc_package_name)
 
   # Enable the package
-  set(SB_BUILD_${uc_package_name} ON CACHE BOOL "" FORCE)
+  set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ON)
 
   # Add this package to the list
   _add_or_remove_external_package(package_name)
@@ -263,7 +287,7 @@ macro(_do_resolve_package_deps package_name)
   if(SB_BUILD_${uc_package_name})
     foreach(dep_package_name ${${package_name}_deps})
       string(TOUPPER ${dep_package_name} uc_dep_package_name)
-      if(NOT SB_USE_SYSTEM_${uc_dep} AND NOT SB_BUILD_${uc_dep_package_name})
+      if(NOT SB_USE_SYSTEM_${uc_dep_package_name} AND NOT SB_BUILD_${uc_dep_package_name})
         _enable_sb_package(${uc_dep_package_name})
         message("[sb:info] Setting build package -- ${dep_package_name} ON -- as required by ${package_name}")
       endif()
