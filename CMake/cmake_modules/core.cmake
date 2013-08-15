@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 2.8)
 # package is not set to be built or not set to use system version, then
 # the system turns ON building of that package.
 #
-# 4. Only one system or superbuild package can be turned ON at a time. If both
-# are found to be ON, then the superbuild package gets the priority for now.
+# 4. Only one; system or superbuild package can be turned ON at a time. If both
+# are found to be ON, then the system one takes the priority.
 #
 #/////////////////////////////////////////////////////////////////////////////
 
@@ -152,9 +152,9 @@ function(add_sb_package)
   option(SB_USE_SYSTEM_${uc_package_name} "${message}" ${_use_system_${lc_package_name}})
   mark_as_advanced(SB_USE_SYSTEM_${uc_package_name})
 
-  # If both system and build are ON, then build wins
+  # If both system and build are ON, then use system one
   if (SB_USE_SYSTEM_${uc_package_name} AND SB_BUILD_${uc_package_name})
-    set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE OFF)
+    set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
   endif()
 
   if(SB_USE_SYSTEM_${uc_package_name})
