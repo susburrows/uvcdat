@@ -279,7 +279,7 @@ endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
 macro(_do_resolve_package_deps package_name)
-  message("PACKAGE NAME ${package_name}")
+  message("[sb:debug] Package name is ${package_name}")
   string(TOUPPER ${package_name} uc_package_name)
   string(TOLOWER ${package_name} lc_package_name)
 
