@@ -2,6 +2,25 @@ cmake_minimum_required(VERSION 2.8)
 
 #/////////////////////////////////////////////////////////////////////////////
 #
+# Rules:
+# 1. Turning ON a group set packages that belong to that group in their
+# default state
+#
+# 2. Turning OFF a group turns off both building and using system packages
+# (but could be overriden by the other group which share one or all of the
+# packages with another group)
+#
+# 3. If a package from one group needs package from another group and if that
+# package is not set to be built or not set to use system version, then
+# the system turns ON building of that package.
+#
+# 4. Only one system or superbuild package can be turned ON at a time. If both
+# are found to be ON, then the superbuild package gets the priority for now.
+#
+#/////////////////////////////////////////////////////////////////////////////
+
+#/////////////////////////////////////////////////////////////////////////////
+#
 # Marcro to extract key-value from the template
 #
 #/////////////////////////////////////////////////////////////////////////////
@@ -65,11 +84,12 @@ endfunction()
 #/////////////////////////////////////////////////////////////////////////////
 function(add_sb_package)
   extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT" ${ARGN})
-  message("[sb:info] ////////////////////////////")
-  message("[sb:info] Adding package ${_name}")
-  message("[sb:info] Package version is ${_version}")
-  message("[sb:info] Package groups are ${_groups}")
-  message("[sb:info] Default state is ${_default}")
+
+  message("")
+  message("[sb:info] ///////Adding [${_name}]///////")
+  message("[sb:info] Package version is [${_version}]")
+  message("[sb:info] Package groups are [${_groups}]")
+  message("[sb:info] Default state is [${_default}]")
 
   # Create convenient names
   string(TOUPPER ${_name} uc_package_name)
@@ -108,7 +128,6 @@ function(add_sb_package)
 
     list(FIND _group_names ${group} ${group}_exists)
     if ("${${group}_exists}" STREQUAL "-1")
-      message("[sb:info] Appending group name ${_group_names}")
       list(APPEND _group_names ${group})
     endif()
 
@@ -122,8 +141,6 @@ function(add_sb_package)
 
     set(_group_names ${_group_names} PARENT_SCOPE)
     set(_${group}_pkgs ${_${group}_pkgs} PARENT_SCOPE)
-
-    message("[sb:debug] group pkgs ${_${group}_pkgs}")
   endforeach()
 
   set(_use_system_${lc_package_name} ${_use_system_${lc_package_name}} PARENT_SCOPE)
@@ -202,8 +219,9 @@ macro(_remove_external_package package_name)
 endmacro()
 
 macro(_create_package_and_groups)
+  message("")
   foreach(group ${_group_names})
-    message("[sb:debug] Group is ${group} with pkgs ${_${group}_pkgs}")
+    message("[sb:info] Group [${group}] has [${_${group}_pkgs}]")
     option(SB_ENABLE_${group} "Enable group ${group}" ON)
 
     # If a group is ON, then eanble all of its packages or else don't build
@@ -299,11 +317,8 @@ endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
 macro(_do_resolve_package_deps package_name)
-  message("[sb:debug] Package name is ${package_name}")
   string(TOUPPER ${package_name} uc_package_name)
   string(TOLOWER ${package_name} lc_package_name)
-
-  message("${SB_BUILD_${uc_package_name}}")
 
   if(SB_BUILD_${uc_package_name})
     foreach(dep_package_name ${${package_name}_deps})
@@ -324,6 +339,7 @@ endmacro()
 #
 #/////////////////////////////////////////////////////////////////////////////
 macro(_create_build_list)
+message("")
 foreach(package ${_external_packages})
   string(TOLOWER ${package} lc_package)
   string(TOUPPER ${package} uc_package)
@@ -334,4 +350,5 @@ foreach(package ${_external_packages})
     include("${lc_package}_external")
   endif()
 endforeach()
+message("")
 endmacro()
