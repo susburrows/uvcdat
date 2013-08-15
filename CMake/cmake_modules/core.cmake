@@ -75,17 +75,13 @@ function(add_sb_package)
   string(TOUPPER ${_name} uc_package_name)
   string(TOLOWER ${_name} lc_package_name)
 
-  # Define a variable that could be used to define dependencies
-  set(${lc_package_name}_pkg "${_name}")
-  set(${lc_package_name}_pkg "${_name}" PARENT_SCOPE)
-
   # Store the initial state for this package
   set(_use_system_${lc_package_name})
   set(_build_package_${lc_package_name})
 
   # Create a place holder to store transient state of the packages
-  set(_transient_use_system_${lc_package_name} PARENT_SCOPE)
-  set(_transient_build_package_${lc_package_name} PARENT_SCOPE)
+  set(_using_system_${lc_package_name} PARENT_SCOPE)
+  set(_using_sb_${lc_package_name} PARENT_SCOPE)
 
   set(_use_system_${lc_package_name} OFF)
   set(_build_package_${lc_package_name} ON)
@@ -154,6 +150,7 @@ function(add_sb_package)
     if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
       message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
     endif()
+
   endif()
 
 endfunction()
@@ -175,18 +172,32 @@ endmacro()
 # Helper macro to gather list of packages and groups
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro(_add_or_remove_external_package package_name)
+macro(_add_external_package package_name)
+  string(TOUPPER ${package_name} uc_package_name)
+  string(TOLOWER ${package_name} lc_package_name)
+
   # Check if the package already exists in the list of external packages
   list(FIND _external_packages "${package_name}" found_package)
 
   # If yes, and if we need to build it, add it to the list
   if("${found_package}"  STREQUAL "-1" AND SB_BUILD_${uc_package_name})
+    # Define a variable that could be used to define dependencies
+    set(${lc_package_name}_pkg "${package_name}")
     list(APPEND _external_packages "${package_name}")
   endif()
+endmacro()
+
+macro(_remove_external_package package_name)
+  string(TOUPPER ${package_name} uc_package_name)
+  string(TOLOWER ${package_name} lc_package_name)
+
+  # Check if the package already exists in the list of external packages
+  list(FIND _external_packages "${package_name}" found_package)
 
   # If yes, and if don't need to build it, then remove it from the list
   if(NOT "${found_package}" STREQUAL "-1" AND NOT SB_BUILD_${uc_package_name})
     list(REMOVE _external_packages "${package_name}")
+    unset(${${lc_package_name}_pkg})
   endif()
 endmacro()
 
@@ -202,13 +213,15 @@ macro(_create_package_and_groups)
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE ${_use_system_${lc_package_name}})
-        set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ${_build_package_${lc_package_name}})
+        if(NOT SB_USE_SYSTEM_${uc_package_name} AND NOT SB_BUILD_${uc_package_name})
+          set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE ${_use_system_${lc_package_name}})
+          set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ${_build_package_${lc_package_name}})
+        endif()
 
-        set(_transient_use_system_${lc_package_name} ${_use_system_${lc_package_name}})
-        set(_transient_build_package_${lc_package_name} ${_build_package_${lc_package_name}})
+        set(_using_system_${lc_package_name} ${_use_system_${lc_package_name}})
+        set(_using_sb_${lc_package_name} ${_build_package_${lc_package_name}})
 
-        _add_or_remove_external_package(${package_name})
+        _add_external_package(${package_name})
 
       endforeach()
     else()
@@ -216,13 +229,16 @@ macro(_create_package_and_groups)
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        if(DEFINED _transient_use_system_${lc_package_name} AND NOT _transient_use_system_${lc_package_name})
+        if(DEFINED _using_system_${lc_package_name} AND NOT _using_system_${lc_package_name})
           set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE OFF)
         endif()
 
-        if(DEFINED _transient_build_package_${lc_package_name} AND NOT _transient_build_package_${lc_package_name})
+        if(DEFINED _using_sb_${lc_package_name} AND NOT _using_sb_${lc_package_name})
           set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
         endif()
+
+        _remove_external_package(${package_name})
+
       endforeach()
     endif()
   endforeach()
@@ -241,8 +257,7 @@ macro(_resolve_package_dependencies)
     string(TOUPPER ${package_name} uc_package_name)
 
     if(NOT SB_BUILD_${uc_package_name})
-      _add_or_remove_external_package(${package_name})
-      unset(${${lc_package_name}_pkg})
+      _remove_external_package(${package_name})
     endif()
   endforeach()
 
@@ -268,7 +283,7 @@ macro(_enable_sb_package package_name)
   set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ON)
 
   # Add this package to the list
-  _add_or_remove_external_package(package_name)
+  _add_external_package(package_name)
 
   # Include package dependencies
   include("${lc_package_name}_deps")

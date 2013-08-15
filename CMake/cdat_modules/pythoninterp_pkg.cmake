@@ -19,7 +19,7 @@ add_sb_package(NAME PythonInterp VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}
 # FIXME: Name style
 set(CDAT_OS_XTRA_PATH "")
 
-if (SB_USE_SYSTEM_PYTHON)
+if (SB_USE_SYSTEM_PYTHONINTERP)
    set(PYVER ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
    # \NOTE This is required or else FindPythonLibs may find whatever version is
    # listed first internally and if that version exists on the system. For example
