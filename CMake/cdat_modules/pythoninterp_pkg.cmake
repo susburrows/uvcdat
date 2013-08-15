@@ -10,20 +10,21 @@ set(PYTHON_GZ Python-${PYTHON_VERSION}.tar.bz2)
 set(PYTHON_MD5 62704ea0f125923208d84ff0568f7d50 )
 set(PYVER ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC})
 
-add_sb_package(NAME Python VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}.${PYTHON_PATCH_SRC}
+include(FindPythonInterp)
+include(FindPythonLibs)
+
+add_sb_package(NAME PythonInterp VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}
   GROUPS "PYTHON;SYSTEM" DEFAULT ON)
 
 # FIXME: Name style
 set(CDAT_OS_XTRA_PATH "")
 
 if (SB_USE_SYSTEM_PYTHON)
-   include(FindPythonInterp)
    set(PYVER ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
    # \NOTE This is required or else FindPythonLibs may find whatever version is
    # listed first internally and if that version exists on the system. For example
    # a system might have python version 2.6 and 2.7 both installed.
    set(Python_ADDITIONAL_VERSIONS ${PYVER})
-   include(FindPythonLibs)
    message("[INFO] Using system python ${PYTHON_EXECUTABLE}")
    set(PYTHON_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX}/lib/python${PYVER}/site-packages)
    message("[INFO] Putting packages in directory ${PYTHON_SITE_PACKAGES}")
