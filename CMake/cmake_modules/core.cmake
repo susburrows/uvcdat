@@ -214,8 +214,10 @@ macro(_create_package_and_groups)
         string(TOLOWER ${package_name} lc_package_name)
 
         if(NOT SB_USE_SYSTEM_${uc_package_name} AND NOT SB_BUILD_${uc_package_name})
-          set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE ${_use_system_${lc_package_name}})
-          set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ${_build_package_${lc_package_name}})
+          set_property(CACHE SB_USE_SYSTEM_${uc_package_name}
+                         PROPERTY VALUE ${_use_system_${lc_package_name}})
+          set_property(CACHE SB_BUILD_${uc_package_name}
+                         PROPERTY VALUE ${_build_package_${lc_package_name}})
         endif()
 
         set(_using_system_${lc_package_name} ${_use_system_${lc_package_name}})
@@ -229,11 +231,14 @@ macro(_create_package_and_groups)
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        if(DEFINED _using_system_${lc_package_name} AND NOT _using_system_${lc_package_name})
-          set_property(CACHE SB_USE_SYSTEM_${uc_package_name} PROPERTY VALUE OFF)
+        if(DEFINED _using_system_${lc_package_name} AND
+           NOT _using_system_${lc_package_name})
+          set_property(CACHE SB_USE_SYSTEM_${uc_package_name}
+                         PROPERTY VALUE OFF)
         endif()
 
-        if(DEFINED _using_sb_${lc_package_name} AND NOT _using_sb_${lc_package_name})
+        if(DEFINED _using_sb_${lc_package_name} AND
+            NOT _using_sb_${lc_package_name})
           set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
         endif()
 
@@ -303,9 +308,11 @@ macro(_do_resolve_package_deps package_name)
   if(SB_BUILD_${uc_package_name})
     foreach(dep_package_name ${${package_name}_deps})
       string(TOUPPER ${dep_package_name} uc_dep_package_name)
-      if(NOT SB_USE_SYSTEM_${uc_dep_package_name} AND NOT SB_BUILD_${uc_dep_package_name})
+      if(NOT SB_USE_SYSTEM_${uc_dep_package_name} AND
+         NOT SB_BUILD_${uc_dep_package_name})
         _enable_sb_package(${uc_dep_package_name})
-        message("[sb:info] Setting build package -- ${dep_package_name} ON -- as required by ${package_name}")
+        message("[sb:info] Setting -- ${dep_package_name} ON -- as
+                 required by ${package_name}")
       endif()
     endforeach()
   endif()
