@@ -356,6 +356,7 @@ include(pythoninterp_pkg)
 include(cdat_pkg)
 include(vtk_pkg)
 include(vistrails_pkg)
+include(png_pkg)
 
 # Configure custom configure/build/install step files
 #-----------------------------------------------------------------------------
