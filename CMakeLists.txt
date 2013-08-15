@@ -351,11 +351,11 @@ include(uuid_pkg)
 include(curl_pkg)
 include(hdf5_pkg)
 include(netcdf_pkg)
-
 include(libcf_pkg)
 include(python_pkg)
 include(cdat_pkg)
 include(vtk_pkg)
+include(vistrails_pkg)
 
 # Configure custom configure/build/install step files
 #-----------------------------------------------------------------------------
