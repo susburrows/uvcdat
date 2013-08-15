@@ -2,7 +2,7 @@
 # and configure and build it
 
 include(GetGitRevisionDescription)
-set(vistrails_branch uvcdat-master)
+set(vistrails_branch master)
 
 get_git_head_revision(refspec sha)
 if("${refspec}" STREQUAL "refs/heads/devel-master")
