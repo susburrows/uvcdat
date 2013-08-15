@@ -241,11 +241,11 @@ macro(_resolve_package_dependencies)
     string(TOUPPER ${package_name} uc_package_name)
 
     if(NOT SB_BUILD_${uc_package_name})
+      _add_or_remove_external_package(${package_name})
       unset(${${lc_package_name}_pkg})
     endif()
   endforeach()
 
-  message("[sb:debug] _resolve_package_dependencies: ${_external_packages}")
   foreach(package_name ${_external_packages})
     string(TOLOWER ${package_name} lc_package_name)
     include("${lc_package_name}_deps")
