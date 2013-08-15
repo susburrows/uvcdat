@@ -249,14 +249,14 @@ macro(_create_package_and_groups)
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        if(DEFINED _using_system_${lc_package_name} AND
-           NOT _using_system_${lc_package_name})
+        # If some other group defined these vars then do nothing
+        if(NOT DEFINED _using_system_${lc_package_name})
           set_property(CACHE SB_USE_SYSTEM_${uc_package_name}
                          PROPERTY VALUE OFF)
         endif()
 
-        if(DEFINED _using_sb_${lc_package_name} AND
-            NOT _using_sb_${lc_package_name})
+        # If some other group defined these vars then do nothing
+        if(NOT DEFINED _using_sb_${lc_package_name})
           set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
         endif()
 
