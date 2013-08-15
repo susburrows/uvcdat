@@ -60,15 +60,16 @@ endfunction()
 #
 # Function to add a package to the superbuild.
 #
-# DEFAULT: ON OFF SYSTEM
+# example: add_sb_package(NAME vtk VERSION 6.0.0 GROUPS VIS;CLIMATE DEFAULT ON)
 #
 #/////////////////////////////////////////////////////////////////////////////
 function(add_sb_package)
   extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT" ${ARGN})
-  message("name is ${_name}")
-  message("version is ${_version}")
-  message("groups are ${_groups}")
-  message("default is ${_default}")
+  message("[sb:info] ////////////////////////////")
+  message("[sb:info] Adding package ${_name}")
+  message("[sb:info] Package version is ${_version}")
+  message("[sb:info] Package groups are ${_groups}")
+  message("[sb:info] Default state is ${_default}")
 
   # Create convenient names
   string(TOUPPER ${_name} uc_package_name)
@@ -78,7 +79,7 @@ function(add_sb_package)
   set(${lc_package_name}_pkg "${_name}")
   set(${lc_package_name}_pkg "${_name}" PARENT_SCOPE)
 
-  # Store the initial state for packages
+  # Store the initial state for this package
   set(_use_system_${lc_package_name})
   set(_build_package_${lc_package_name})
 
@@ -151,7 +152,7 @@ function(add_sb_package)
     endif()
 
     if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
-      message(FATAL_ERROR "[sb:error] Unable to find sytem package ${_name}")
+      message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
     endif()
   endif()
 
