@@ -10,16 +10,17 @@ if("${refspec}" STREQUAL "refs/heads/devel-master")
 endif()
 
 set(vistrails_tag_point_message "Specify branch of vistrails to be used for UVCDAT")
-set(VISTRAILS_TAG_POINT ${vistrails_branch} CACHE STRING "${vistrails_tag_point_message}")
-set(vistrails_url "${GIT_PROTOCOL}vistrails.org/git/vistrails.git")
+set(vistrails_tag_point ${vistrails_branch} CACHE STRING "${vistrails_tag_point_message}")
+set(vistrails_url "${GIT_PROTOCOL}github.com/OpenGeoscience/VisTrails.git")
 
 if(CDAT_AUTO_UPDATE_VISTRAILS_TAG_POINT)
-  set(VISTRAILS_TAG_POINT ${vistrails_branch} CACHE STRING "${vistrails_tag_point_message}" FORCE)
+  set(vistrails_tag_point ${vistrails_branch} CACHE STRING "${vistrails_tag_point_message}" FORCE)
 endif()
+
 
 # For configure purposes
 set(SOURCE_DIR "${CMAKE_INSTALL_PREFIX}/vistrails")
-set(BRANCH ${VISTRAILS_TAG_POINT})
+set(BRANCH ${vistrails_tag_point})
 set(GIT_URL "${vistrails_url}")
 
 option(CDAT_DELETE_VISTRAILS_HISTORY "Delete GIT history of vistrails" OFF)
