@@ -6,6 +6,6 @@ set(JPEG_VERSION v8c)
 
 #grib2/jasper need this therefore cdms2 can't turn off
 #if (CDAT_BUILD_GRAPHICS)
-add_cdat_package(jpeg "" "" "")
+add_sb_package(NAME jpeg GROUPS "SYSTEM" DEFAULT ON)
 #endif()
 

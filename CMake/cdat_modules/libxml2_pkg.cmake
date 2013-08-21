@@ -13,6 +13,6 @@ string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 set(LIBXML2_VERSION ${XML_VERSION})
 
-add_sb_package(NAME libXML2 GROUPS SYSTEM DEFAULT ON)
+add_sb_package(NAME libXML2 GROUPS "SYSTEM" DEFAULT ON)
 
 

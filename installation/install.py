@@ -623,7 +623,7 @@ def main(arglist):
         print 'Running:',control_file
         execfile(control_file, globals(), globals())
 
-    if showlist:
+    if True: #showlist:
         print 'List of Packages that would be installed:'
         for p in packages:
             print p

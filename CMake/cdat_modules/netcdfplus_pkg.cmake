@@ -10,4 +10,4 @@ string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 set(NETCDFPLUS_VERSION ${NC4PLUS_VERSION})
 
-add_cdat_package_dependent(NetCDFPLUS "" "" ON "CDAT_BUILD_WO_ESGF" OFF)
+add_sb_package(NAME NetCDFPLUS GROUPS "WO_ESGF" OFF)

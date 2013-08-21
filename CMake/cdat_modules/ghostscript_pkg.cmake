@@ -1,2 +1,2 @@
-add_cdat_package(ghostscript "" "" "")
+add_sb_package(NAME ghostscript GROUPS "SYSTEM")
 

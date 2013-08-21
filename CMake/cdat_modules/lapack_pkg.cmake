@@ -12,6 +12,6 @@ set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 #Removing apple exclusion for now
 if(NOT APPLE)
   if(CMAKE_Fortran_COMPILER)
-    add_cdat_package(LAPACK "" "" "")
+    add_sb_package(NAME LAPACK GROUPS "SYSTEM" DEFAULT ON)
   endif()
 endif()

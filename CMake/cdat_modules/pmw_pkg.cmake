@@ -11,4 +11,4 @@ set (nm PMW)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 
-add_sb_package(NAME Pmw GROUPS "VIS" DEFAULT ON)
+add_sb_package(NAME Pmw GROUPS "SYSTEM" DEFAULT ON)

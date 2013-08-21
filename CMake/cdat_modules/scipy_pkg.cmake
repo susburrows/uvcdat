@@ -12,4 +12,4 @@ set (nm SCIPY)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR_SRC}.${${nm}_MINOR_SRC}.${${nm}_PATCH_SRC})
 
-add_cdat_package_dependent(SCIPY "" "" ON "CDAT_BUILD_WO_ESGF" OFF)
+add_sb_package(NAME SCIPY GROUPS "WO_ESGF" OFF)

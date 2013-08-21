@@ -27,5 +27,5 @@ configure_file(${cdat_CMAKE_SOURCE_DIR}/cdat_modules_extra/version.in
   @ONLY
 )
 
-add_sb_package(NAME CDAT GROUPS "CLIMATE" DEFAULT ON)
+add_sb_package(NAME CDAT GROUPS "SYSTEM" DEFAULT ON)
 

@@ -6,5 +6,5 @@ set(basemap_GZ basemap-${basemap_MAJOR}.${basemap_MINOR}.${basemap_PATCH}.tar.gz
 set(basemap_MD5 089260ea2b3eebb9d63e1783d0b15298 )
 set(BASEMAP_VERSION ${basemap_MAJOR}.${basemap_MINOR}.${basemap_PATCH})
 
-add_cdat_package_dependent(basemap "" "" ON "CDAT_BUILD_GRAPHICS" OFF)
+add_sb_package(NAME basemap GROUPS "GRAPHICS" DEFAULT ON)
 

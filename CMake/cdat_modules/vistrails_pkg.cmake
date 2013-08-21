@@ -1,1 +1,1 @@
-add_sb_package(NAME vistrails GROUPS CLIMATE-GUI DEFAULT ON)
+add_sb_package(NAME vistrails GROUPS GUI DEFAULT ON)

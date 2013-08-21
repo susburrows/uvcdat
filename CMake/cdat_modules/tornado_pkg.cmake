@@ -1,2 +1,2 @@
 set(TORNADO_VERSION 3.0.1)
-add_cdat_package(tornado "" "" "")
+add_sb_package(NAME tornado GROUPS "SYSTEM" DEFAULT ON)

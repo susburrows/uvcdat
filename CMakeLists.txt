@@ -346,6 +346,7 @@ include(tiff_pkg)
 include(readline_pkg)
 include(libxml2_pkg)
 include(libxslt_pkg)
+include(jpeg_pkg)
 include(zlib_pkg)
 include(uuid_pkg)
 include(curl_pkg)
@@ -357,6 +358,7 @@ include(cdat_pkg)
 include(vtk_pkg)
 include(vistrails_pkg)
 include(png_pkg)
+include(yasm_pkg)
 
 # Configure custom configure/build/install step files
 #-----------------------------------------------------------------------------
@@ -402,6 +404,7 @@ _execute()
 file(WRITE ${PARTS_BUILT_INFO} ${packages_info})
 # Construct Include and Link variables
 #-----------------------------------------------------------------------------
+message("[INFO] System include dirs: ${found_system_include_dirs}")
 if(found_system_include_dirs)
   list(REMOVE_DUPLICATES found_system_include_dirs)
   list(REMOVE_ITEM found_system_include_dirs ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES} ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES})
