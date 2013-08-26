@@ -289,7 +289,7 @@ macro(_resolve_package_dependencies)
     string(TOLOWER ${package_name} lc_package_name)
     string(TOUPPER ${package_name} uc_package_name)
 
-    if(NOT SB_BUILD_${uc_package_name})
+    if(NOT SB_ENABLE_${uc_package_name})
       _remove_external_package(${package_name})
     endif()
   endforeach()
@@ -305,6 +305,7 @@ macro(_resolve_package_dependencies)
 
   include(TopologicalSort)
   topological_sort(_external_packages "" "_deps")
+  message("EPS ARE ${_external_packages}")
 endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -313,7 +314,7 @@ macro(_enable_sb_package package_name)
   string(TOLOWER ${package_name} lc_package_name)
 
   # Enable the package
-  set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE ON)
+  set_property(CACHE SB_ENABLE_${uc_package_name} PROPERTY VALUE ON)
 
   # Add this package to the list
   _add_external_package(package_name)
@@ -330,11 +331,11 @@ macro(_do_resolve_package_deps package_name)
   string(TOUPPER ${package_name} uc_package_name)
   string(TOLOWER ${package_name} lc_package_name)
 
-  if(SB_BUILD_${uc_package_name})
+  if(SB_ENABLE_${uc_package_name} STREQUAL "ON")
+
     foreach(dep_package_name ${${package_name}_deps})
       string(TOUPPER ${dep_package_name} uc_dep_package_name)
-      if(NOT SB_USE_SYSTEM_${uc_dep_package_name} AND
-         NOT SB_BUILD_${uc_dep_package_name})
+      if(NOT SB_ENABLE_${uc_dep_package_name})
         _enable_sb_package(${uc_dep_package_name})
         message("[sb:info] Setting -- ${dep_package_name} ON -- as
                  required by ${package_name}")
@@ -354,7 +355,7 @@ foreach(package ${_external_packages})
   string(TOLOWER ${package} lc_package)
   string(TOUPPER ${package} uc_package)
 
-  if(SB_BUILD_${uc_package})
+  if(SB_ENABLE_${uc_package} STREQUAL "ON")
     message("[sb:info] Package --- ${package} --- will be built")
     list(APPEND packages_info "${package} ${${uc_package}_VERSION}\n")
     include("${lc_package}_external")
