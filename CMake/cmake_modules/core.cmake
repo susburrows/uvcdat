@@ -3,20 +3,17 @@ cmake_minimum_required(VERSION 2.8)
 #/////////////////////////////////////////////////////////////////////////////
 #
 # Rules:
-# 1. Turning ON a group set packages that belong to that group in their
-# default state
+# 1. Turning ON a group sets packages that belong to that group to their
+# default state.
 #
-# 2. Turning OFF a group turns off both building and using system packages
-# (but could be overriden by the other group which share one or all of the
-# packages with another group)
+# 2. Turning OFF a group turns off packages, unless some other group is still on
+# that also requires the package.
 #
-# 3. If a package from one group needs package from another group and if that
-# package is not set to be built or not set to use system version, then
-# the system turns ON building of that package.
+# 3. If a package's default state is ON or SYSTEM and some group that requires it
+# is ON. Then the user can turn if from ON to SYSTEM of vice-versa.
 #
-# 4. Only one; system or superbuild package can be turned ON at a time. If both
-# are found to be ON, then the system one takes the priority.
-#
+# 4. If a package's default state is OFF, and no groups that require it are ON,
+# then the user can change it to OFF, ON, or SYSTEM.
 #/////////////////////////////////////////////////////////////////////////////
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -96,23 +93,16 @@ function(add_sb_package)
   string(TOLOWER ${_name} lc_package_name)
 
   # Store the initial state for this package
-  set(_use_system_${lc_package_name})
-  set(_build_package_${lc_package_name})
+  set(_enable_package_${lc_package_name} ${_default})
 
   # Create a place holder to store transient state of the packages
-  set(_using_system_${lc_package_name} PARENT_SCOPE)
-  set(_using_sb_${lc_package_name} PARENT_SCOPE)
+  set(_enable_package_${lc_package_name} PARENT_SCOPE)
 
-  set(_use_system_${lc_package_name} OFF)
-  set(_build_package_${lc_package_name} ON)
-
-  if("${_default}" STREQUAL "ON")
-    set(_build_package_${lc_package_name} ON)
-  elseif("${_default}" STREQUAL "OFF")
-    set(_build_package_${lc_package_name} OFF)
-  elseif("${_default}" STREQUAL "SYSTEM")
-    set(_use_system_${lc_package_name} ON)
-    set(_build_package_${lc_package_name} OFF)
+  # Remember what groups this package belongs to
+  if (_groups)
+    list(LENGTH _groups _num_groups)
+    message("${lc_package_name} belongs to ${_groups} ${_num_groups}")
+    set(_package_${lc_package_name}_groups ${_groups} PARENT_SCOPE)
   endif()
 
   # Find all the groups this package belongs to and then
@@ -126,14 +116,14 @@ function(add_sb_package)
       set(_group_pkgs)
     endif()
 
+    # If this is the first time this group has been seen, remember it
     list(FIND _group_names ${group} ${group}_exists)
     if ("${${group}_exists}" STREQUAL "-1")
       list(APPEND _group_names ${group})
     endif()
 
-    # Check if the package is already a part of the group or not
-    # if it is skip adding it or else add it to the list of packages
-    # group will enable
+    # If this package is not yet part of this group, add it to the list
+    # of packages that the group controls.
     list(FIND _${group}_pkgs ${_name} ${_name}_exists_in_${group})
     if(${${_name}_exists_in_${group}} STREQUAL "-1")
       list(APPEND _${group}_pkgs ${_name})
@@ -143,21 +133,21 @@ function(add_sb_package)
     set(_${group}_pkgs ${_${group}_pkgs} PARENT_SCOPE)
   endforeach()
 
-  set(_use_system_${lc_package_name} ${_use_system_${lc_package_name}} PARENT_SCOPE)
-  set(_build_package_${lc_package_name} ${_build_package_${lc_package_name}} PARENT_SCOPE)
+  set(_enable_package_${lc_package_name} ${_enable_package_${lc_package_name}} PARENT_SCOPE)
 
-  option(SB_BUILD_${uc_package_name} "${message}" ${_build_package_${lc_package_name}})
-  mark_as_advanced(SB_BUILD_${uc_package_name})
-
-  option(SB_USE_SYSTEM_${uc_package_name} "${message}" ${_use_system_${lc_package_name}})
-  mark_as_advanced(SB_USE_SYSTEM_${uc_package_name})
-
-  # If both system and build are ON, then use system one
-  if (SB_USE_SYSTEM_${uc_package_name} AND SB_BUILD_${uc_package_name})
-    set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
+  set(SB_ENABLE_${uc_package_name} "${_enable_package_${lc_package_name}}" CACHE STRING "${message}")
+  #for cmake-gui
+  set_property(CACHE SB_ENABLE_${uc_package_name} PROPERTY STRINGS OFF ON SYSTEM)
+  #for everything else
+  if (NOT SB_ENABLE_${uc_package_name} STREQUAL "OFF" AND
+      NOT SB_ENABLE_${uc_package_name} STREQUAL "ON" AND
+      NOT SB_ENABLE_${uc_package_name} STREQUAL "SYSTEM")
+    message("WARNING: ${uc_package_name} is set ${SB_ENABLE_${uc_package_name}}. Packages must be either set to OFF, ON, or SYSTEM. Setting it to OFF.")
+    set(SB_ENABLE_${uc_package_name} OFF CACHE STRING "${message}" FORCE)
   endif()
+  #mark_as_advanced(SB_ENABLE_${uc_package_name}) #put back when done testing
 
-  if(SB_USE_SYSTEM_${uc_package_name})
+  if(SB_ENABLE_SYSTEM_${uc_package_name} STREQUAL "SYSTEM")
     if(DEFINED _version)
       find_package(${_name} ${_version})
     else()
@@ -169,7 +159,6 @@ function(add_sb_package)
     endif()
 
   endif()
-
 endfunction()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -197,10 +186,12 @@ macro(_add_external_package package_name)
   list(FIND _external_packages "${package_name}" found_package)
 
   # If yes, and if we need to build it, add it to the list
-  if("${found_package}"  STREQUAL "-1" AND SB_BUILD_${uc_package_name})
-    # Define a variable that could be used to define dependencies
-    set(${lc_package_name}_pkg "${package_name}")
-    list(APPEND _external_packages "${package_name}")
+  if("${found_package}"  STREQUAL "-1")
+    if (SB_ENABLE_${uc_package_name} STREQUAL "ON")
+      # Define a variable that could be used to define dependencies
+      set(${lc_package_name}_pkg "${package_name}")
+      list(APPEND _external_packages "${package_name}")
+    endif()
   endif()
 endmacro()
 
@@ -212,9 +203,11 @@ macro(_remove_external_package package_name)
   list(FIND _external_packages "${package_name}" found_package)
 
   # If yes, and if don't need to build it, then remove it from the list
-  if(NOT "${found_package}" STREQUAL "-1" AND NOT SB_BUILD_${uc_package_name})
-    list(REMOVE _external_packages "${package_name}")
-    unset(${${lc_package_name}_pkg})
+  if(NOT "${found_package}" STREQUAL "-1")
+    if (NOT SB_ENABLE_${uc_package_name} STREQUAL "ON")
+      list(REMOVE _external_packages "${package_name}")
+      unset(${${lc_package_name}_pkg})
+    endif()
   endif()
 endmacro()
 
@@ -224,22 +217,35 @@ macro(_create_package_and_groups)
     message("[sb:info] Group [${group}] has [${_${group}_pkgs}]")
     option(SB_ENABLE_${group} "Enable group ${group}" ON)
 
-    # If a group is ON, then eanble all of its packages or else don't build
-    # any of its packages (unless this is overriden by dependency walker.
+    # If a group is ON, then set all of its packages to their default state.
     if (SB_ENABLE_${group})
       foreach(package_name ${_${group}_pkgs})
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        if(NOT SB_USE_SYSTEM_${uc_package_name} AND NOT SB_BUILD_${uc_package_name})
-          set_property(CACHE SB_USE_SYSTEM_${uc_package_name}
-                         PROPERTY VALUE ${_use_system_${lc_package_name}})
-          set_property(CACHE SB_BUILD_${uc_package_name}
-                         PROPERTY VALUE ${_build_package_${lc_package_name}})
+        if (SB_ENABLE_${uc_package_name} STREQUAL "OFF")
+          #turn to ON/SYSTEM if package wants it that way
+          set_property(CACHE SB_ENABLE_${uc_package_name}
+                         PROPERTY VALUE ${_enable_package_${lc_package_name}})
+        else()
+          if (${_enable_package_${lc_package_name}} STREQUAL "OFF")
+            #turn to OFF if package wants it that way
+            set_property(CACHE SB_ENABLE_${uc_package_name}
+                         PROPERTY VALUE ${_enable_package_${lc_package_name}})
+          endif()
         endif()
 
-        set(_using_system_${lc_package_name} ${_use_system_${lc_package_name}})
-        set(_using_sb_${lc_package_name} ${_build_package_${lc_package_name}})
+        if(SB_ENABLE_${uc_package_name} STREQUAL "SYSTEM")
+          if(${uc_package_name}_INCLUDE_DIR)
+            list(APPEND found_system_include_dirs ${${uc_package_name}_INCLUDE_DIR})
+          endif()
+          if(${uc_package_name}_LIBRARY)
+            get_filename_component(lib_path ${${uc_package_name}_LIBRARY} PATH)
+            list(APPEND found_system_libraries ${lib_path})
+          endif()
+        endif()
+
+        set(_package_state_${lc_package_name} ${_enable_package_${lc_package_name}})
 
         _add_external_package(${package_name})
 
@@ -249,15 +255,19 @@ macro(_create_package_and_groups)
         string(TOUPPER ${package_name} uc_package_name)
         string(TOLOWER ${package_name} lc_package_name)
 
-        # If some other group defined these vars then do nothing
-        if(NOT DEFINED _using_system_${lc_package_name})
-          set_property(CACHE SB_USE_SYSTEM_${uc_package_name}
-                         PROPERTY VALUE OFF)
-        endif()
-
-        # If some other group defined these vars then do nothing
-        if(NOT DEFINED _using_sb_${lc_package_name})
-          set_property(CACHE SB_BUILD_${uc_package_name} PROPERTY VALUE OFF)
+        # If any other group still needs this package, do nothing otherwise turn it off
+        list(LENGTH _package_${lc_package_name}_groups _num_groups)
+        set(_all_off TRUE)
+        foreach(group ${_package_${lc_package_name}_groups})
+           if (${SB_ENABLE_${group}})
+             set(_all_off FALSE)
+           endif()
+        endforeach()
+        if (_all_off)
+           if (NOT ${_enable_package_${lc_package_name}} STREQUAL "OFF")
+             set_property(CACHE SB_ENABLE_${uc_package_name}
+                         PROPERTY VALUE "OFF")
+           endif()
         endif()
 
         _remove_external_package(${package_name})

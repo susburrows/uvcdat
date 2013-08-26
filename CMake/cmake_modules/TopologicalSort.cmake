@@ -75,6 +75,7 @@ function(topological_sort LIST PREFIX SUFFIX)
     # If we haven't already processed this vertex, start a depth-first
     # search from where.
     if (NOT FOUND_${VERTEX})
+
       # Push this vertex onto the stack with all of its outgoing edges
       string(REPLACE ";" " " NEW_ELEMENT
         "${VERTEX};${${PREFIX}${VERTEX}${SUFFIX}}")
@@ -82,6 +83,12 @@ function(topological_sort LIST PREFIX SUFFIX)
 
       # We've now seen this vertex
       set(FOUND_${VERTEX} TRUE)
+
+      # Turn this on to inspect dependency graph in GraphViz etc
+      set(OUTPUT_DEP_GRAPH_FOR_DOT TRUE)
+      if (OUTPUT_DEP_GRAPH_FOR_DOT)
+        message("${VERTEX};")
+      endif()
 
       # While the depth-first search stack is not empty
       list(LENGTH STACK STACK_LENGTH)
@@ -93,6 +100,23 @@ function(topological_sort LIST PREFIX SUFFIX)
 
         # Get the source vertex and the list of out-edges
         separate_arguments(OUT_EDGES)
+
+        # to view in dot format
+        if (OUTPUT_DEP_GRAPH_FOR_DOT)
+          set(_foooo ${OUT_EDGES})
+          list(LENGTH _foooo list_count)
+          math(EXPR list_max_index ${list_count}-1)
+          foreach(i RANGE ${list_max_index})
+            list(GET _foooo ${i} x)
+            if (NOT VERTEX STREQUAL x)
+            if (NOT FOUND_${VERTEX}_TO_${x})
+              set(FOUND_${VERTEX}_TO_${x} TRUE)
+              message("${VERTEX} -> ${x};")
+            endif()
+            endif()
+          endforeach(i)
+        endif()
+
         list(GET OUT_EDGES 0 SOURCE)
         list(REMOVE_AT OUT_EDGES 0)
 
