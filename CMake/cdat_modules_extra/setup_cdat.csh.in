@@ -4,24 +4,41 @@ setenv PATH "@CMAKE_INSTALL_PREFIX@/bin:${PATH}"
 setenv PATH "@cdat_EXTERNALS@/bin:${PATH}"
 setenv PATH "@CMAKE_INSTALL_PREFIX@/Library/Frameworks/Python.framework/Versions/@PYVER@/bin:${PATH}"
 
+set _tmp_path="@CMAKE_INSTALL_PREFIX@/lib/python@PYVER@/site-packages"
+set _tmp_path="${_tmp_path}:@cdat_EXTERNALS@/lib"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@/site-packages"
 if $?PYTHONPATH then
-  setenv  PYTHONPATH "@CMAKE_INSTALL_PREFIX@/lib/python@PYVER@/site-packages:@cdat_EXTERNALS@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@/site-packages:${PYTHONPATH}"
+  setenv PYTHONPATH "${_tmp_path}:${PYTHONPATH}"
 else
-  setenv  PYTHONPATH "@CMAKE_INSTALL_PREFIX@/lib/python@PYVER@/site-packages:@cdat_EXTERNALS@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@/site-packages"
+  setenv PYTHONPATH "${_tmp_path}"
 endif
 
+set _tmp_path="@QT_LIB_DIR@"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@"
+set _tmp_path="${_tmp_path}:@cdat_EXTERNALS@/lib"
+set _tmp_path="${_tmp_path}:@cdat_EXTERNALS@/lib/R/lib"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@"
 if $?LD_LIBRARY_PATH then
-  setenv LD_LIBRARY_PATH "@QT_LIB_DIR@:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@:@cdat_EXTERNALS@/lib:@cdat_EXTERNALS@/lib/R/lib:@CMAKE_INSTALL_PREFIX@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@:${LD_LIBRARY_PATH}"
+  setenv LD_LIBRARY_PATH "${_tmp_path}:${LD_LIBRARY_PATH}"
 else
-  setenv LD_LIBRARY_PATH "@QT_LIB_DIR@:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@:@cdat_EXTERNALS@/lib:@cdat_EXTERNALS@/lib/R/lib:@CMAKE_INSTALL_PREFIX@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@"
+  setenv LD_LIBRARY_PATH "${_tmp_path}"
 endif
 
+set _tmp_path="@QT_LIB_DIR@"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@"
+set _tmp_path="${_tmp_path}:@cdat_EXTERNALS@/lib"
+set _tmp_path="${_tmp_path}:@cdat_EXTERNALS@/lib/R/lib"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib"
+set _tmp_path="${_tmp_path}:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@"
 if $?DYLD_FALLBACK_LIBRARY_PATH then
-  setenv DYLD_FALLBACK_LIBRARY_PATH "@QT_LIB_DIR@:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@:@cdat_EXTERNALS@/lib:@cdat_EXTERNALS@/lib/R/lib:@CMAKE_INSTALL_PREFIX@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@:${DYLD_FALLBACK_LIBRARY_PATH}"
+  setenv DYLD_LIBRARY_PATH "${_tmp_path}:${DYLD_LIBRARY_PATH}"
 else
-  setenv DYLD_FALLBACK_LIBRARY_PATH "@QT_LIB_DIR@:@CMAKE_INSTALL_PREFIX@/lib/paraview-@PARAVIEW_MAJOR@.@PARAVIEW_MINOR@:@cdat_EXTERNALS@/lib:@cdat_EXTERNALS@/lib/R/lib:@CMAKE_INSTALL_PREFIX@/lib:@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@"
+  setenv DYLD_LIBRARY_PATH "${_tmp_path}"
 endif
+
 setenv VISITPLUGINDIR "@CMAKE_INSTALL_PREFIX@/lib/VisIt-@VISIT_VERSION@-plugins"
+
 setenv R_HOME "@cdat_EXTERNALS@/lib/R"
 
 setenv LIBOVERLAY_SCROLLBAR 0

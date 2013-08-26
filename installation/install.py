@@ -623,7 +623,7 @@ def main(arglist):
         print 'Running:',control_file
         execfile(control_file, globals(), globals())
 
-    if True: #showlist:
+    if showlist:
         print 'List of Packages that would be installed:'
         for p in packages:
             print p
@@ -647,13 +647,22 @@ def main(arglist):
             target = os.path.join(target_prefix, 'bin', script)
             if os.path.isfile(target): os.unlink(target)
             shutil.copy(script, target)
+            print >>sys.stderr, 'Copy ', script, " TO ", target
+        print >>sys.stderr, "HERE IS ", here
         os.chdir(here)
         dat_dir = os.path.join(src_dir, 'Packages/dat')
+        print >>sys.stderr, "DAT DIR IS ", dat_dir
         os.chdir(dat_dir)
         target = os.path.join(target_prefix, 'sample_data')
+        print >>sys.stderr, "TARGET DIR IS ", target
+        print >>sys.stderr, "BUILD DIR IS ", os.environ['BUILD_DIR']
         command = 'grep wget %s/checked_get.sh' % os.path.join(os.environ['BUILD_DIR'], "..")
         command = command + ' | tr -s " " | cut -d " " -f 2'
-        wget = os.popen(command).readlines()[0].strip()
+        print >>sys.stderr, "COMMAND IS ", command
+        try:
+          wget = os.popen(command).readlines()[0].strip()
+        except:
+          wget = ""
         data_source_url = "http://uv-cdat.llnl.gov/cdat/sample_data"
         dfiles=open("files.txt")
         data_files=dfiles.readlines()
@@ -662,7 +671,7 @@ def main(arglist):
             os.makedirs(target)
         except:
             pass
-        if sampleData: # Turn to False to skip sample_data download, need to add an option to turn this off
+        if False: #sampleData: # Turn to False to skip sample_data download, need to add an option to turn this off
             for df in data_files:
                 sp=df.strip().split()
                 fnm=sp[1]
