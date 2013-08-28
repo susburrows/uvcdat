@@ -82,11 +82,11 @@ endfunction()
 function(add_sb_package)
   extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT" ${ARGN})
 
-  message("")
-  message("[sb:info] ///////Adding [${_name}]///////")
-  message("[sb:info] Package version is [${_version}]")
-  message("[sb:info] Package groups are [${_groups}]")
-  message("[sb:info] Default state is [${_default}]")
+  #message("")
+  #message("[sb:info] ///////Adding [${_name}]///////")
+  #message("[sb:info] Package version is [${_version}]")
+  #message("[sb:info] Package groups are [${_groups}]")
+  #message("[sb:info] Default state is [${_default}]")
 
   # Create convenient names
   string(TOUPPER ${_name} uc_package_name)
@@ -101,7 +101,7 @@ function(add_sb_package)
   # Remember what groups this package belongs to
   if (_groups)
     list(LENGTH _groups _num_groups)
-    message("${lc_package_name} belongs to ${_groups} ${_num_groups}")
+    #message("[sb:info] ${lc_package_name} belongs to ${_groups} ${_num_groups}")
     set(_package_${lc_package_name}_groups ${_groups} PARENT_SCOPE)
   endif()
 
@@ -145,7 +145,7 @@ function(add_sb_package)
     message("WARNING: ${uc_package_name} is set ${SB_ENABLE_${uc_package_name}}. Packages must be either set to OFF, ON, or SYSTEM. Setting it to OFF.")
     set(SB_ENABLE_${uc_package_name} OFF CACHE STRING "${message}" FORCE)
   endif()
-  #mark_as_advanced(SB_ENABLE_${uc_package_name}) #put back when done testing
+  mark_as_advanced(SB_ENABLE_${uc_package_name})
 
   if(SB_ENABLE_SYSTEM_${uc_package_name} STREQUAL "SYSTEM")
     if(DEFINED _version)
@@ -212,7 +212,7 @@ macro(_remove_external_package package_name)
 endmacro()
 
 macro(_create_package_and_groups)
-  message("")
+  #message("")
   foreach(group ${_group_names})
     message("[sb:info] Group [${group}] has [${_${group}_pkgs}]")
     option(SB_ENABLE_${group} "Enable group ${group}" ON)
@@ -305,7 +305,7 @@ macro(_resolve_package_dependencies)
 
   include(TopologicalSort)
   topological_sort(_external_packages "" "_deps")
-  message("EPS ARE ${_external_packages}")
+  #message("[sb:info] External Packages are [${_external_packages}]")
 endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -350,7 +350,7 @@ endmacro()
 #
 #/////////////////////////////////////////////////////////////////////////////
 macro(_create_build_list)
-message("")
+#message("")
 foreach(package ${_external_packages})
   string(TOLOWER ${package} lc_package)
   string(TOUPPER ${package} uc_package)
@@ -361,5 +361,5 @@ foreach(package ${_external_packages})
     include("${lc_package}_external")
   endif()
 endforeach()
-message("")
+#message("")
 endmacro()

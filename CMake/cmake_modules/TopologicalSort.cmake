@@ -68,6 +68,14 @@ function(topological_sort LIST PREFIX SUFFIX)
   set(STACK)
   set(${LIST})
 
+  # Turn this on to inspect dependency graph in GraphViz etc
+  option(OUTPUT_DEP_GRAPH_FOR_DOT "When on, cmake will print to console a dot format graph of dependencies of enabled packages." FALSE)
+  mark_as_advanced(OUTPUT_DEP_GRAPH_FOR_DOT)
+  if (OUTPUT_DEP_GRAPH_FOR_DOT)
+    message("[sb:info] dependencies in dot format :")
+    message("digraph package_dependencies {")
+  endif()
+
   # Loop over all of the vertices, starting the topological sort from
   # each one.
   foreach(VERTEX ${VERTICES})
@@ -84,8 +92,6 @@ function(topological_sort LIST PREFIX SUFFIX)
       # We've now seen this vertex
       set(FOUND_${VERTEX} TRUE)
 
-      # Turn this on to inspect dependency graph in GraphViz etc
-      set(OUTPUT_DEP_GRAPH_FOR_DOT TRUE)
       if (OUTPUT_DEP_GRAPH_FOR_DOT)
         message("${VERTEX};")
       endif()
@@ -159,6 +165,10 @@ function(topological_sort LIST PREFIX SUFFIX)
       endwhile(STACK_LENGTH GREATER 0)
     endif (NOT FOUND_${VERTEX})
   endforeach(VERTEX)
+
+  if (OUTPUT_DEP_GRAPH_FOR_DOT)
+    message("}")
+  endif()
 
   set(${LIST} ${${LIST}} PARENT_SCOPE)
 endfunction(topological_sort)
