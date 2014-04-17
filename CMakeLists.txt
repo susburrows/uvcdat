@@ -489,12 +489,7 @@ configure_file(${cdat_CMAKE_SOURCE_DIR}/fix_install_name.py.in
 
 # Now sort and include external packages
 #-----------------------------------------------------------------------------
-include(TopologicalSort)
-message("[DEBUG] packages ${external_packages}")
-foreach(package ${external_packages})
-  string(TOLOWER ${package} lc_package)
-  include("${lc_package}_deps")
-endforeach()
+_execute()
 
 file(WRITE ${PARTS_BUILT_INFO} ${packages_info})
 # Construct Include and Link variables
