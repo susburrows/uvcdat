@@ -15,4 +15,4 @@ set(FREETYPE_VERSION ${FT_VERSION})
 set(FREETYPE_SOURCE ${FT_URL}/${FT_GZ})
 
 
-add_sb_package(freetype GROUPS "GRAPHICS" ON)
+add_sb_package(NAME freetype GROUPS "GRAPHICS" ON)
