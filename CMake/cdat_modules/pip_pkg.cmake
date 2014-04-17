@@ -10,4 +10,4 @@ set(PIP_GZ pip-${PIP_VERSION}.tar.gz)
 set(PIP_SOURCE ${PIP_URL}/${PIP_GZ})
 set(PIP_MD5 db8a6d8a4564d3dc7f337ebed67b1a85)
 
-add_sb_package(NAME pip GROUP "SYSTEM" DEFAULT ON)
+add_sb_package(NAME pip GROUPS "SYSTEM" DEFAULT ON)
