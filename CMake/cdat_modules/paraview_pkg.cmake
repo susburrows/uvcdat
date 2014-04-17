@@ -7,4 +7,4 @@ set(PARAVIEW_GZ ParaView-${PARAVIEW_VERSION}c.tar.gz)
 set(PARAVIEW_MD5 v4.1.0)
 set(PARAVIEW_SOURCE ${GIT_PROTOCOL}github.com/UV-CDAT/ParaView.git )
 
-add_cdat_package_dependent(ParaView "" "" ON "CDAT_BUILD_GRAPHICS" OFF)
+add_sb_package(NAME ParaView GROUPS "GUI" ON)

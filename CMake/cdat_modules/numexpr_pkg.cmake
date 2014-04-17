@@ -9,4 +9,4 @@ set(NUMEXPR_GZ numexpr-${NUMEXPR_VERSION}.tar.gz)
 set(NUMEXPR_MD5 8c138e81fb4214d05453da0fc88bf0d5 )
 set(NUMEXPR_SOURCE ${NUMEXPR_URL}/${NUMEXPR_GZ})
 
-add_cdat_package(Numexpr "" "" "")
+add_sb_package(NAME Numexpr GROUPS "SYSTEM" DEFAULT ON)

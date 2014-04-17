@@ -1,10 +1,8 @@
-if (CDAT_BUILD_GRAPHICS)
-  find_package(Qt4 4.7.2 REQUIRED)
+add_sb_package(NAME Qt4 GROUPS GRAPHICS VERSION 4.7.2 DEFAULT SYSTEM)
 
-  if (CDAT_BUILD_GUI)
-    if (NOT DEFINED QT_QTOPENGL_INCLUDE_DIR)
-      message(FATAL_ERROR "QT_QTOPENGL_INCLUDE_DIR is not set but required")
-    endif()
+if (SB_USE_SYSTEM_QT4)
+  if (NOT DEFINED QT_QTOPENGL_INCLUDE_DIR)
+    message(FATAL_ERROR "QT_QTOPENGL_INCLUDE_DIR is not set but required")
   endif()
 endif()
 

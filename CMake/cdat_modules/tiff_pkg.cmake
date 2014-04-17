@@ -9,4 +9,5 @@ set(TIFF_SOURCE ${TIFF_URL}/${TIFF_GZ})
 set (nm TIFF)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR}.${${nm}_MINOR}.${${nm}_PATCH})
-add_cdat_package_dependent(tiff "" "" ON "CDAT_BUILD_GRAPHICS" OFF)
+
+add_sb_package(NAME tiff GROUPS "GRAPHICS" DEFAULT ON)

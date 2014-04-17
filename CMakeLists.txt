@@ -45,6 +45,7 @@ set(CMAKE_MODULE_PATH
 
 # Include useful cmake scripts
 #-----------------------------------------------------------------------------
+include(core)
 include(cmake_utils)
 include(check_fortran)
 include(CTest)
@@ -90,7 +91,7 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES_M "64" CACHE STRING "" FORCE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "${OSX_VER_MAJOR}.${OSX_VER_MINOR}" CACHE STRING "" FORCE)
   endif()
-
+  
   # Support only 10.6 or higher for now
   if(IS_DIRECTORY "/Developer/SDKs/MacOSX10.6.sdk")
     set(HAVE_10_6_SDK TRUE)
@@ -111,7 +112,7 @@ if(APPLE)
     set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.7.sdk" CACHE PATH "" FORCE)
   elseif(HAVE_10_8_SDK)
     if(NOT IS_DIRECTORY /opt/X11/include/X11)
-        #  message(FATAL_ERROR "[ERROR] X11 headers are not found")
+      message(FATAL_ERROR "[ERROR] X11 headers are not found")
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/X11/include/X11")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I/opt/X11/include/X11")
@@ -223,18 +224,25 @@ option(CDAT_BUILD_PARALLEL "Build parallel components of CDAT" ON)
 set(EGG_INSTALLER "PIP" CACHE STRING "Which package installer to use")
 set_property(CACHE EGG_INSTALLER PROPERTY STRINGS "PIP" "EASY_INSTALL")
 set(PIP_CERTIFICATE "" CACHE STRING "Certificate to use for PIP (LLNL issue really)")
-
-# Options for various types of builds
+#Options for various types of builds
 option(CDAT_BUILD_GUI "Builds GUI-based dependencies (Vistrails, ParaView, VisIt, R, etc...) " ON)
 option(CDAT_BUILD_GRAPHICS "Build graphics-based dependencies (vcs, pyqt, Vistrails, ParaView, VisIt, R, etc...) " ON)
 option(CDAT_BUILD_ESGF "Builds a customized version for ESGF (Tkinter, less packages etc..)" OFF)
 
-# Flipping the option, Aashish add_cdat_external_dependent seems to need a negative of that
-if (CDAT_BUILD_ESGF)
-    set(CDAT_BUILD_WO_ESGF OFF)
-else()
-    set(CDAT_BUILD_WO_ESGF ON)
-endif()
+# Option for various types of builds
+#option(CDAT_BUILD_PARALLEL "Build parallel components of CDAT" ON)
+#option(CDAT_BUILD_ESGF "Builds a customized version for ESGF (Tkinter, less packages etc..)" OFF)
+##Flipping the option, Aashish add_cdat_external_dependent seems to need a negative of that
+#if (CDAT_BUILD_ESGF)
+#    set(CDAT_BUILD_WO_ESGF OFF)
+#else()
+#    set(CDAT_BUILD_WO_ESGF ON)
+#endif()
+#if (NOT CDAT_BUILD_WO_ESGF)
+#    set(CDMS_ONLY --enable-cdms-only)
+#else()
+#    set(CDMS_ONLY "")
+#endif()
 
 # First of all if ESGF then turn OFF GRAPHICS
 if (NOT CDAT_BUILD_WO_ESGF)
@@ -435,10 +443,7 @@ include(zlib_pkg)
 include(cdatlogger_pkg)
 include(pyclimate_pkg)
 include(scientificpython_pkg)
-if (CDAT_BUILD_ESGF)
-    include(lxml_pkg)
-endif()
-
+include(lxml_pkg)
 
 # Configure custom configure/build/install step files
 #-----------------------------------------------------------------------------
@@ -491,22 +496,6 @@ foreach(package ${external_packages})
   include("${lc_package}_deps")
 endforeach()
 
-topological_sort(external_packages "" "_deps")
-
-foreach(package ${external_packages})
-  enable_cdat_package_deps(${package})
-endforeach()
-
-foreach(package ${external_packages})
-  string(TOLOWER ${package} lc_package)
-  string(TOUPPER ${package} uc_package)
-
-  if(CDAT_BUILD_${uc_package})
-      message("[INFO] Package --- ${package}/${uc_package}/${${uc_package}_VERSION} --- will be built")
-    list(APPEND packages_info "${package} ${${uc_package}_VERSION} ${${uc_package}_SOURCE} ${${uc_package}_MD5}\n")
-    include("${lc_package}_external")
-  endif()
-endforeach()
 file(WRITE ${PARTS_BUILT_INFO} ${packages_info})
 # Construct Include and Link variables
 #-----------------------------------------------------------------------------

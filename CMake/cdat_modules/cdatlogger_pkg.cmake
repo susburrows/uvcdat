@@ -1,4 +1,4 @@
 set(CDATLOGGER_VERSION N/A)
 set(CDATLOGGER_SOURCE N/A)
 
-add_cdat_package(CDATLogger "" "" "")
+add_sb_package(NAME CDATLogger GROUPS "SYSTEM" DEFAULT ON)

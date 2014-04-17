@@ -9,4 +9,4 @@ set(IPYTHON_MD5 ead3b7eb70c653b537fb9d96d71b8b2a)
 set(IPYTHON_SOURCE ${IPYTHON_URL}/${IPYTHON_GZ})
 
 
-add_cdat_package(IPYTHON "" "" "")
+add_sb_package(NAME IPYTHON GROUPS "SYSTEM" DEFAULT ON)

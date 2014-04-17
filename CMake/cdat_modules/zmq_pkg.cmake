@@ -7,4 +7,4 @@ set(ZMQ_GZ zeromq-${ZMQ_VERSION}.tar.gz)
 set(ZMQ_MD5 df68431d9300da84a1a5f9a2784e33de )
 set(ZMQ_SOURCE ${ZMQ_URL}/${ZMQ_GZ})
 
-add_cdat_package(ZMQ "" "" "")
+add_sb_package(NAME ZMQ GROUPS "SYSTEM" DEFAULT ON)

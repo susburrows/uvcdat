@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-set(proj Python)
+set(proj PythonInterp)
 
 set(python_SOURCE_DIR ${cdat_BINARY_DIR}/build/Python)
 set(python_BUILD_IN_SOURCE 1)

@@ -11,7 +11,11 @@ set(PYTHON_MD5 62704ea0f125923208d84ff0568f7d50 )
 set(PYVER ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC})
 set(PYTHON_SOURCE ${PYTHON_URL}/${PYTHON_GZ})
 
-add_cdat_package(Python ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}.${PYTHON_PATCH_SRC} "" "")
+include(FindPythonInterp)
+include(FindPythonLibs)
+
+add_sb_package(NAME PythonInterp VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}
+  GROUPS "PYTHON;SYSTEM" DEFAULT ON)
 
 # FIXME: Name style
 set(CDAT_OS_XTRA_PATH "")
