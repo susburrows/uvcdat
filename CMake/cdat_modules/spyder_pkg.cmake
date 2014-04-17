@@ -5,4 +5,4 @@ set(SPYDER_SOURCE ${SPYDER_URL}/${SPYDER_GZ})
 set(SPYDER_MD5 1c9aa650dae9f883616e917803f8a3be)
 
 
-add_sb_package(NAME spyder GROUPS "GUI" ON)
+add_sb_package(NAME spyder GROUPS "GUI" DEFAULT ON)

@@ -7,4 +7,4 @@ set(PYTABLES_GZ tables-${PYTABLES_VERSION}.tar.gz)
 set(PYTABLES_MD5 ec20938fca8b579020c5a4cc567caf7c)
 set(PYTABLES_SOURCE ${PYTABLES_URL}/${PYTABLES_GZ})
 
-add_sb_package(NAME PyTables GROUPS "WO_ESGF" OFF)
+add_sb_package(NAME PyTables GROUPS "WO_ESGF" DEFAULT OFF)

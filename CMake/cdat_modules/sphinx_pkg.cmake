@@ -10,5 +10,5 @@ set(SPHINX_GZ Sphinx-${SPHINX_VERSION}.tar.gz)
 set(SPHINX_SOURCE ${SPHINX_URL}/${SPHINX_GZ})
 set(SPHINX_MD5 67bea6df63be8e2a76ebedc76d8f71a3)
 
-add_sb_package(NAME Sphinx GROUPS "WO_ESGF" OFF)
+add_sb_package(NAME Sphinx GROUPS "WO_ESGF" DEFAULT OFF)
 
