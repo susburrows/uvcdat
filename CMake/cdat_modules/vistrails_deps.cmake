@@ -1,1 +1,1 @@
-set(vistrails_deps ${pythoninterp_pkg})
+set(vistrails_deps ${python_pkg})

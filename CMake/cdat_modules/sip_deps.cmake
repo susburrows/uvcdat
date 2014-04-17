@@ -1,1 +1,1 @@
-set(SIP_deps ${pkgconfig_pkg} ${pythoninterp_pkg})
+set(SIP_deps ${pkgconfig_pkg} ${python_pkg})
