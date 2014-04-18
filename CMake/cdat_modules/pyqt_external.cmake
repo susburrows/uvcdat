@@ -6,7 +6,7 @@ message("[INFO] Using environment PYTHONPATH \"$ENV{PYTHONPATH}\"")
 set(sip_token "")
 set(sip_include_dir_token "")
 
-if (SB_BUILD_SIP)
+if (SB_ENABLE_SIP STREQUAL "ON")
   set(sip_token "--sip=${sip_binary_dir}/sip")
   set(sip_include_dir_token "--sip-incdir=${sip_include_dir}")
 endif()
