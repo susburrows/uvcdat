@@ -147,7 +147,7 @@ function(add_sb_package)
   endif()
   mark_as_advanced(SB_ENABLE_${uc_package_name})
 
-  if(SB_ENABLE_SYSTEM_${uc_package_name} STREQUAL "SYSTEM")
+  if(SB_ENABLE_${uc_package_name} STREQUAL "SYSTEM")
     if(DEFINED _version)
       find_package(${_name} ${_version})
     else()
