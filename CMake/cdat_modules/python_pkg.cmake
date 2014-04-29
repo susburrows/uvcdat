@@ -24,7 +24,7 @@ if (APPLE)
 endif()
 set(PYTHONPATH ${PYTHON_SITE_PACKAGES})
 
-if (CDAT_USE_SYSTEM_PYTHON)
+if (SB_ENABLE_PYTHON STREQUAL "SYSTEM")
    include(FindPythonInterp)
    set(PYVER ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
    # \NOTE This is required or else FindPythonLibs may find whatever version is

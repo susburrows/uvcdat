@@ -228,7 +228,6 @@ set(PIP_CERTIFICATE "" CACHE STRING "Certificate to use for PIP (LLNL issue real
 option(CDAT_BUILD_GUI "Builds GUI-based dependencies (Vistrails, ParaView, VisIt, R, etc...) " ON)
 option(CDAT_BUILD_GRAPHICS "Build graphics-based dependencies (vcs, pyqt, Vistrails, ParaView, VisIt, R, etc...) " ON)
 option(CDAT_BUILD_ESGF "Builds a customized version for ESGF (Tkinter, less packages etc..)" OFF)
-option(CDAT_USE_SYSTEM_PYTHON "Using system Python" OFF)
 
 # Option for various types of builds
 #option(CDAT_BUILD_PARALLEL "Build parallel components of CDAT" ON)
@@ -406,7 +405,7 @@ include(scipy_pkg)
 include(setuptools_pkg)
 ## Part of setuptools no need to extra build it
 ## include(distribute_pkg)
-if (NOT CDAT_USE_SYSTEM_PYTHON)
+if(SB_ENABLE_PYTHON STREQUAL "ON")
   include(pip_pkg)
 endif()
 include(shapely_pkg)
