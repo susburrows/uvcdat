@@ -10,4 +10,4 @@ string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR}.${${nm}_MINOR}.${${nm}_PATCH})
 set(GEOS_SOURCE ${GEOS_URL}/${GEOS_BZ2})
 
-add_sb_package(NAME GEOS GROUPS "WO_ESGF" DEFAULT OFF)
+add_sb_package(NAME GEOS GROUPS "WO_ESGF" DEFAULT ON)
