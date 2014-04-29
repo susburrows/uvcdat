@@ -11,7 +11,7 @@ set(PYTHON_MD5 62704ea0f125923208d84ff0568f7d50 )
 set(PYVER ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC})
 set(PYTHON_SOURCE ${PYTHON_URL}/${PYTHON_GZ})
 
-add_sb_package(NAME Python VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}
+add_sb_package(NAME PythonInterp VERSION ${PYTHON_MAJOR_SRC}.${PYTHON_MINOR_SRC}
   GROUPS "PYTHON;SYSTEM" DEFAULT ON)
 
 # FIXME: Name style
@@ -24,8 +24,7 @@ if (APPLE)
 endif()
 set(PYTHONPATH ${PYTHON_SITE_PACKAGES})
 
-if (SB_ENABLE_PYTHON STREQUAL "SYSTEM")
-   include(FindPythonInterp)
+if (SB_ENABLE_PYTHONINTERP STREQUAL "SYSTEM")
    set(PYVER ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
    # \NOTE This is required or else FindPythonLibs may find whatever version is
    # listed first internally and if that version exists on the system. For example

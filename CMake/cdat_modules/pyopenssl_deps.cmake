@@ -1,1 +1,1 @@
-set(PYOPENSSL_deps ${python_pkg} ${pip_pkg})
+set(PYOPENSSL_deps ${pythoninterp_pkg} ${pip_pkg})
