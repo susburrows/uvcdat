@@ -15,7 +15,7 @@ if(APPLE)
   set(qt_flags "--enable-qt-framework")
 endif()
 
-set(qt_flags "${qt_flags} --with-qt=${QT_ROOT} --with-qt-lib=${QT_LIB_DIR} --with-qt-inc=${QT_INC_DIR}" --with-qt-bin=${QT_BINARY_DIR})
+set(qt_flags "${qt_flags} --with-qt=${QT_ROOT} --with-qt-lib=${QT_LIB_DIR} --with-qt-inc=${QT_INC_DIR} --with-qt-bin=${QT_BINARY_DIR}")
 
 if (CDAT_BUILD_WITH_LIBDRS)
  set(qt_flags "${qt_flags} -c pcmdi.py")

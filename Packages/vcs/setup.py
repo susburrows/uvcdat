@@ -194,7 +194,7 @@ if WM=="QT" or EM=="QT":
     vcsbase_qt = os.path.join(here, 'Src','Qt')
     s10 = map(lambda x: os.path.join(vcsbase_qt,x), qtsourcelist)
 
-    qt_include_dirs=[os.path.join(here, 'Include','Qt'),]
+    qt_include_dirs=[os.path.join(here, 'Include'), os.path.join(here, 'Include', 'Qt')]
 ## Generic non framework thing
     MOC = os.path.join(QT_PATH_BIN,"moc")
     print "looking for MOC in:",MOC
@@ -499,7 +499,7 @@ try:
  shutil.copytree("Include", "%s/vcs/Include" % ptho)
 except Exception,err:
  ptho=target_prefix+"/lib/python%i.%i/site-packages/" % sys.version_info[:2]
- shutil.rmtree("%s/vcs/Include" % ptho,ignore_errors=False)
+ shutil.rmtree("%s/vcs/Include" % ptho,ignore_errors=True)
  try:
    shutil.copytree("Include", "%s/vcs/Include" % ptho)
  except:
@@ -552,11 +552,12 @@ if (WM=='QT' or EM=='QT'):
     import sipconfig
     from PyQt4 import pyqtconfig
 
+    sipconfig._pkg_config['default_mod_dir'] = ptho
 
     from distutils import sysconfig
 
-    vcs_so = '%s/vcs/_vcs.so' % sysconfig.get_python_lib()
-    vcs_inc = '%s/vcs/Include' % sysconfig.get_python_lib()
+    vcs_so = '%s/vcs/_vcs.so' % ptho
+    vcs_inc = '%s/vcs/Include' % ptho
 
     ## vcs_so = '/Users/hvo/src/uvcdat/cdatBuild/lib/python2.7/site-packages/vcs/_vcs.so'
     ## vcs_inc = '/Users/hvo/src/uvcdat/cdat/Packages/vcs/Include'
