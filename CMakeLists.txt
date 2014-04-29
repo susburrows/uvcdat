@@ -244,19 +244,6 @@ option(CDAT_BUILD_ESGF "Builds a customized version for ESGF (Tkinter, less pack
 #    set(CDMS_ONLY "")
 #endif()
 
-# First of all if ESGF then turn OFF GRAPHICS
-if (NOT CDAT_BUILD_WO_ESGF)
-    set(CDAT_BUILD_GRAPHICS OFF)
-    set(CDAT_BUILD_PARALLEL OFF)
-    set(CDMS_ONLY --enable-cdms-only)
-else()
-    set(CDMS_ONLY "")
-endif()
-
-# If no graphics then no gui as well
-if (NOT CDAT_BUILD_GRAPHICS)
-  set(CDAT_BUILD_GUI OFF)
-endif()
 set(ep_prefix ${cdat_BINARY_DIR}/build/prefix)
 set_property(DIRECTORY PROPERTY ep_log_dir ${cdat_BINARY_DIR}/logs)
 set(ep_log_options
