@@ -6,8 +6,11 @@ if(APPLE)
     set(ENV{CFLAGS} "@cdat_osx_arch_flag@ @cdat_osx_version_flag@ @cdat_osx_sysroot@")
 endif()
 
+message("PYTHONPATH: $ENV{PYTHONPATH}")
+message(" LD: $ENV{LD_LIBRARY_PATH}")
+
 execute_process(
-  COMMAND "@PYTHON_EXECUTABLE@" setup.py build
+  COMMAND env PYTHONPATH=@PYTHONPATH@ @LIBRARY_PATH@=@cdat_EXTERNALS@/lib "@PYTHON_EXECUTABLE@" setup.py build
   WORKING_DIRECTORY "@basemap_binary@"
   RESULT_VARIABLE res
   OUTPUT_VARIABLE basemap_OUT
