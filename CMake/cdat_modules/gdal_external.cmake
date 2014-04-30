@@ -7,8 +7,6 @@ if (SB_ENABLE_TIFF STREQUAL "ON")
   list(APPEND _args --with-libtiff=<INSTALL_DIR>)
 endif()
 
-message("_args: ${_args}")
-
 ExternalProject_Add(gdal
   DOWNLOAD_DIR ${CDAT_PACKAGE_CACHE_DIR}
   SOURCE_DIR ${gdal_source}
