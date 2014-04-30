@@ -33,7 +33,7 @@ ExternalProject_Add(${nm}
   BUILD_IN_SOURCE 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
-  INSTALL_COMMAND env PYTHONPATH=${PYTHONPATH} ${USR_ENVS} ${PYTHON_EXECUTABLE} setup.py install ${PRFX}
+  INSTALL_COMMAND env PYTHONPATH=${PYTHONPATH} @LIBRARY_PATH@=@cdat_EXTERNALS@/lib ${USR_ENVS} ${PYTHON_EXECUTABLE} setup.py install ${PRFX}
   DEPENDS ${${nm}_deps}
   ${ep_log_options}
 )
