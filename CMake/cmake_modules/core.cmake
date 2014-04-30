@@ -228,7 +228,7 @@ macro(_create_package_and_groups)
           set_property(CACHE SB_ENABLE_${uc_package_name}
                          PROPERTY VALUE ${_enable_package_${lc_package_name}})
         else()
-          if (${_enable_package_${lc_package_name}} STREQUAL "OFF")
+          if ("${_enable_package_${lc_package_name}}" STREQUAL "OFF")
             #turn to OFF if package wants it that way
             set_property(CACHE SB_ENABLE_${uc_package_name}
                          PROPERTY VALUE ${_enable_package_${lc_package_name}})
