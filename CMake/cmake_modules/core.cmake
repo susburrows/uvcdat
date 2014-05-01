@@ -95,9 +95,6 @@ macro(add_sb_package)
   # Store the initial state for this package
   set(_enable_package_${lc_package_name} ${_default})
 
-  # Create a place holder to store transient state of the packages
-  set(_enable_package_${lc_package_name})
-
   # Remember what groups this package belongs to
   if (_groups)
     list(LENGTH _groups _num_groups)
@@ -132,8 +129,6 @@ macro(add_sb_package)
     set(_group_names ${_group_names})
     set(_${group}_pkgs ${_${group}_pkgs})
   endforeach()
-
-  set(_enable_package_${lc_package_name} ${_enable_package_${lc_package_name}})
 
   set(SB_ENABLE_${uc_package_name} "${_enable_package_${lc_package_name}}" CACHE STRING "${message}")
   #for cmake-gui
