@@ -81,7 +81,7 @@ endfunction()
 # example: add_sb_package(NAME vtk VERSION 6.0.0 GROUPS VIS;CLIMATE DEFAULT ON)
 #
 #/////////////////////////////////////////////////////////////////////////////
-macro(add_sb_package)
+function(add_sb_package)
   extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT" ${ARGN})
 
   #message("")
@@ -97,11 +97,14 @@ macro(add_sb_package)
   # Store the initial state for this package
   set(_enable_package_${lc_package_name} ${_default})
 
+  # Create a place holder to store transient state of the packages
+  set(_enable_package_${lc_package_name} PARENT_SCOPE)
+
   # Remember what groups this package belongs to
   if (_groups)
     list(LENGTH _groups _num_groups)
     #message("[sb:info] ${lc_package_name} belongs to ${_groups} ${_num_groups}")
-    set(_package_${lc_package_name}_groups ${_groups})
+    set(_package_${lc_package_name}_groups ${_groups} PARENT_SCOPE)
   endif()
 
   # Find all the groups this package belongs to and then
@@ -128,13 +131,16 @@ macro(add_sb_package)
       list(APPEND _${group}_pkgs ${_name})
     endif()
 
-    set(_group_names ${_group_names})
-    set(_${group}_pkgs ${_${group}_pkgs})
+    set(_group_names ${_group_names} PARENT_SCOPE)
+    set(_${group}_pkgs ${_${group}_pkgs} PARENT_SCOPE)
   endforeach()
+
+  set(_enable_package_${lc_package_name} ${_enable_package_${lc_package_name}} PARENT_SCOPE)
 
   set(SB_ENABLE_${uc_package_name} "${_enable_package_${lc_package_name}}" CACHE STRING "${message}")
   #for cmake-gui
   set_property(CACHE SB_ENABLE_${uc_package_name} PROPERTY STRINGS OFF ON SYSTEM)
+
   #for everything else
   if (NOT SB_ENABLE_${uc_package_name} STREQUAL "OFF" AND
       NOT SB_ENABLE_${uc_package_name} STREQUAL "ON" AND
@@ -171,7 +177,7 @@ macro(add_sb_package)
     endif()
 
   endif()
-endmacro()
+endfunction()
 
 #/////////////////////////////////////////////////////////////////////////////
 #
