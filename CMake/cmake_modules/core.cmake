@@ -74,6 +74,12 @@ function(extract_args template)
   set(ARGN "${_extra}" PARENT_SCOPE)
 endfunction()
 
+macro(add_sb_python_package)
+  set(_tmp ${ARGN})
+  list(APPEND _tmp PYTHON_PACKAGE TRUE)
+  add_sb_package(${_tmp})
+endmacro()
+
 #/////////////////////////////////////////////////////////////////////////////
 #
 # Function to add a package to the superbuild.
@@ -82,7 +88,11 @@ endfunction()
 #
 #/////////////////////////////////////////////////////////////////////////////
 function(add_sb_package)
-  extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT" ${ARGN})
+  extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT;_python=PYTHON_PACKAGE" ${ARGN})
+
+  if ( "${_python}" STREQUAL "")
+    set(_python FALSE)
+  endif()
 
   #message("")
   #message("[sb:info] ///////Adding [${_name}]///////")
@@ -151,28 +161,35 @@ function(add_sb_package)
   mark_as_advanced(SB_ENABLE_${uc_package_name})
 
   if(SB_ENABLE_${uc_package_name} STREQUAL "SYSTEM")
-    if(DEFINED _version)
-      find_package(${_name} ${_version} QUIET)
-    else()
-      find_package(${_name} QUIET)
-    endif()
 
-    if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
-      # First see if we already have an adequate version of the package install.
-      message("Checking python version")
+    if(NOT _python)
+        if(DEFINED _version)
+          find_package(${_name} ${_version})
+        else()
+          find_package(${_name})
+        endif()
+
+        if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
+          message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
+        endif()
+    # Python package so query Python for installed version
+    else()
       unset(_installed_version)
       python_package_version(${_name} _installed_version)
 
-      if(NOT "" STREQUAL "${_version}" AND _installed_version)
-        if(_installed_version VERSION_EQUAL _version OR
-           _installed_version VERSION_GREATER _version)
-          message("[INFO] We have ${_name} ${_installed_version} installed")
-          set(${package_name}_system_package_found 1)
+      if(_installed_version)
+        if(NOT "" STREQUAL "${_version}")
+          if(_installed_version VERSION_EQUAL _version OR
+             _installed_version VERSION_GREATER _version)
+            message("[INFO] We have ${_name} ${_installed_version} installed")
+          else()
+            message(FATAL_ERROR "[sb:error] Unable to find required version Python package ${_name}, ${_version} is required, ${_installed_version} is installed")
+          endif()
+        else()
+          message(WARNING "[sb:warning] No required version specified for Python package ${_name}")
         endif()
-      endif()
-
-      if (NOT ${package_name}_system_package_found)
-        message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
+      else()
+          message(FATAL_ERROR "[sb:error] Unable to find Python package ${_name}")
       endif()
     endif()
 
@@ -353,8 +370,7 @@ macro(_do_resolve_package_deps package_name)
 
     foreach(dep_package_name ${${package_name}_deps})
       string(TOUPPER ${dep_package_name} uc_dep_package_name)
-      if(NOT SB_ENABLE_${uc_dep_package_name} OR
-         NOT "SB_ENABLE_${uc_dep_package_name}" STREQUAL "SYSTEM")
+      if(NOT SB_ENABLE_${uc_dep_package_name})
         _enable_sb_package(${uc_dep_package_name})
         message("[sb:info] Setting -- ${dep_package_name} ON -- as
                  required by ${package_name}")
