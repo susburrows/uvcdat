@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+include(PythonPackageInfo)
+
 #/////////////////////////////////////////////////////////////////////////////
 #
 # Rules:
@@ -144,13 +146,28 @@ macro(add_sb_package)
 
   if(SB_ENABLE_${uc_package_name} STREQUAL "SYSTEM")
     if(DEFINED _version)
-      find_package(${_name} ${_version})
+      find_package(${_name} ${_version} QUIET)
     else()
-      find_package(${_name})
+      find_package(${_name} QUIET)
     endif()
 
     if(NOT ${_name}_FOUND AND NOT ${uc_package_name}_FOUND)
-      message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
+      # First see if we already have an adequate version of the package install.
+      message("Checking python version")
+      unset(_installed_version)
+      python_package_version(${_name} _installed_version)
+
+      if(NOT "" STREQUAL "${_version}" AND _installed_version)
+        if(_installed_version VERSION_EQUAL _version OR
+           _installed_version VERSION_GREATER _version)
+          message("[INFO] We have ${_name} ${_installed_version} installed")
+          set(${package_name}_system_package_found 1)
+        endif()
+      endif()
+
+      if (NOT ${package_name}_system_package_found)
+        message(FATAL_ERROR "[sb:error] Unable to find system package ${_name}")
+      endif()
     endif()
 
   endif()
@@ -330,7 +347,8 @@ macro(_do_resolve_package_deps package_name)
 
     foreach(dep_package_name ${${package_name}_deps})
       string(TOUPPER ${dep_package_name} uc_dep_package_name)
-      if(NOT SB_ENABLE_${uc_dep_package_name})
+      if(NOT SB_ENABLE_${uc_dep_package_name} OR
+         NOT "SB_ENABLE_${uc_dep_package_name}" STREQUAL "SYSTEM")
         _enable_sb_package(${uc_dep_package_name})
         message("[sb:info] Setting -- ${dep_package_name} ON -- as
                  required by ${package_name}")
