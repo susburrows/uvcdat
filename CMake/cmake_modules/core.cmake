@@ -87,7 +87,7 @@ endmacro()
 # example: add_sb_package(NAME vtk VERSION 6.0.0 GROUPS VIS;CLIMATE DEFAULT ON)
 #
 #/////////////////////////////////////////////////////////////////////////////
-function(add_sb_package)
+macro(add_sb_package)
   extract_args("_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT;_python=PYTHON_PACKAGE" ${ARGN})
 
   if ( "${_python}" STREQUAL "")
@@ -105,16 +105,16 @@ function(add_sb_package)
   string(TOLOWER ${_name} lc_package_name)
 
   # Store the initial state for this package
-  set(_enable_package_${lc_package_name} ${_default})
+  set(_enable_package ${_default})
 
   # Create a place holder to store transient state of the packages
-  set(_enable_package_${lc_package_name} PARENT_SCOPE)
+  set(_enable_package_${lc_package_name})
 
   # Remember what groups this package belongs to
   if (_groups)
     list(LENGTH _groups _num_groups)
     #message("[sb:info] ${lc_package_name} belongs to ${_groups} ${_num_groups}")
-    set(_package_${lc_package_name}_groups ${_groups} PARENT_SCOPE)
+    set(_package_${lc_package_name}_groups ${_groups})
   endif()
 
   # Find all the groups this package belongs to and then
@@ -141,11 +141,11 @@ function(add_sb_package)
       list(APPEND _${group}_pkgs ${_name})
     endif()
 
-    set(_group_names ${_group_names} PARENT_SCOPE)
-    set(_${group}_pkgs ${_${group}_pkgs} PARENT_SCOPE)
+    set(_group_names ${_group_names})
+    set(_${group}_pkgs ${_${group}_pkgs})
   endforeach()
 
-  set(_enable_package_${lc_package_name} ${_enable_package_${lc_package_name}} PARENT_SCOPE)
+  set(_enable_package_${lc_package_name} ${_enable_package})
 
   set(SB_ENABLE_${uc_package_name} "${_enable_package_${lc_package_name}}" CACHE STRING "${message}")
   #for cmake-gui
@@ -193,7 +193,7 @@ function(add_sb_package)
       endif()
     endif()
   endif()
-endfunction()
+endmacro()
 
 #/////////////////////////////////////////////////////////////////////////////
 #
