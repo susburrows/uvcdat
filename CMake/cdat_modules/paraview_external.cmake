@@ -8,7 +8,7 @@ if(QT_QMAKE_EXECUTABLE)
 endif()
 
 if(APPLE)
-  set(MACOSX_APP_INSTALL_PREFIX "${SB_EXTERNALS_DIR}") 
+  set(MACOSX_APP_INSTALL_PREFIX "${SB_EXTERNALS_DIR}")
 endif()
 
 # Initialize
@@ -138,7 +138,7 @@ ExternalProject_Add(ParaView
   SOURCE_DIR ${ParaView_source}
   BINARY_DIR ${ParaView_binary}
   INSTALL_DIR ${ParaView_install}
-  ${GIT_CMD_STR} 
+  ${GIT_CMD_STR}
   GIT_TAG ${paraview_branch}
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
