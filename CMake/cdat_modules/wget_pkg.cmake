@@ -6,13 +6,13 @@ set(WGET_URL ${LLNL_URL})
 set(WGET_GZ wget-${WGET_MAJOR}.${WGET_MINOR}.tar.gz)
 set(WGET_MD5 141461b9c04e454dc8933c9d1f2abf83)
 set(WGET_SOURCE ${WGET_URL}/${WGET_GZ})
-
-add_sb_package(NAME Wget GROUPS SYSTEM DEFAULT OFF)
-
 set (nm WGET)
 string(TOUPPER ${nm} uc_nm)
 set(${uc_nm}_VERSION ${${nm}_MAJOR}.${${nm}_MINOR})
-if(CDAT_BUILD_WGET)
+
+add_sb_package(NAME Wget VERSION ${${uc_nm}_VERSION} GROUPS SYSTEM DEFAULT SYSTEM)
+
+if(SB_ENABLE_WGET STREQUAL "ON")
   if(WIN32)
     set(WGET_EXECUTABLE ${cdat_EXTERNALS}/bin/wget.exe)
   else()
