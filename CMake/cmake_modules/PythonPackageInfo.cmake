@@ -1,9 +1,9 @@
-function(python_package_version pkg version)
+function(python_package_version pkg version version_exp)
   if (NOT EXISTS ${PYTHON_EXECUTABLE})
     message(FATAL_ERROR "Invalid Python environment, ${PYTHON_EXECUTABLE} doesn't exist")
   endif()
 
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} "${cdat_CMAKE_SOURCE_DIR}/version.py" ${pkg} RESULT_VARIABLE _res OUTPUT_VARIABLE _version)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} "${cdat_CMAKE_SOURCE_DIR}/version.py" ${pkg} "${version_exp}" RESULT_VARIABLE _res OUTPUT_VARIABLE _version)
   if (NOT _res)
     set(${version} ${_version} PARENT_SCOPE)
   else()

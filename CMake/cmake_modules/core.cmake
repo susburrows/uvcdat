@@ -75,7 +75,7 @@ function(extract_args template)
 endfunction()
 
 # Used in add_sb_XXX(...)
-set(_args_to_extract "_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT;_python_pkg=PYTHON_PACKAGE")
+set(_args_to_extract "_name=NAME;_version=VERSION;_groups=GROUPS;_default=DEFAULT;_python_pkg=PYTHON_PACKAGE;_version_expression=VERSION_EXPRESSION")
 
 macro(add_sb_python_package)
   extract_args("${_args_to_extract}" ${ARGN})
@@ -178,7 +178,7 @@ macro(add_sb_package)
     # Python package so query Python for installed version
     else()
       unset(_installed_version)
-      python_package_version(${_python_pkg} _installed_version)
+      python_package_version(${_python_pkg} _installed_version "${_version_expression}")
       if(_installed_version)
         if(NOT "" STREQUAL "${_version}")
           if(_installed_version VERSION_EQUAL _version OR
