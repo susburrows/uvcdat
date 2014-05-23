@@ -2,7 +2,7 @@
 set(libXML2_source "${CMAKE_CURRENT_BINARY_DIR}/build/libXML2")
 set(libXML2_install "${cdat_EXTERNALS}")
 
-ExternalProject_Add(libXML2
+ExternalProject_Add(LibXml2
   DOWNLOAD_DIR ${CDAT_PACKAGE_CACHE_DIR}
   SOURCE_DIR ${libXML2_source}
   INSTALL_DIR ${libXML2_install}

@@ -1,1 +1,1 @@
-set(libXML2_deps ${pkgconfig_pkg} ${readline_pkg})
+set(LibXml2_deps ${pkgconfig_pkg} ${readline_pkg})
