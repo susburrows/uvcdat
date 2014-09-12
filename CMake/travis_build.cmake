@@ -9,6 +9,12 @@ set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 ctest_start("Continuous")
 ctest_configure()
 ctest_build()
+
+set(ENV{PATH} "$ENV{PATH}:${CTEST_BINARY_DIRECTORY}/install/bin:${CTEST_BINARY_DIRECTORY}/install/Externals/bin")
+set(ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${CTEST_BINARY_DIRECTORY}/install/lib:${CTEST_BINARY_DIRECTORY}/install/Externals/lib")
+set(ENV{DYLD_LIBRARY_PATH} "$ENV{DYLD_LIBRARY_PATH}:${CTEST_BINARY_DIRECTORY}/install/lib:${CTEST_BINARY_DIRECTORY}/install/Externals/lib")
+set(ENV{PYTHONPATH} "$ENV{PYTHONPATH}:${CTEST_BINARY_DIRECTORY}/install/lib/python2.7/site-packages:${CTEST_BINARY_DIRECTORY}/install/Externals/lib/python2.7/site-packages")
+
 ctest_test(INCLUDE vcs PARALLEL_LEVEL 1 RETURN_VALUE res)
 #ctest_coverage()
 #file(REMOVE ${CTEST_BINARY_DIRECTORY}/coverage.xml)
