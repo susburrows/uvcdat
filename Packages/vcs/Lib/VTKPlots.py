@@ -28,6 +28,7 @@ class VCSInteractorStyle(vtk.vtkInteractorStyleUser):
       self.AddObserver("LeftButtonReleaseEvent", parent.leftButtonReleaseEvent )
       self.AddObserver( "ModifiedEvent", parent.configureEvent )
       self.AddObserver( "ConfigureEvent", parent.configureEvent )
+      self.AddObserver( 'CharEvent', parent.keyEvent )    
       
 class VTKVCSBackend(object):
   def __init__(self,canvas,renWin=None, debug=False,bg=None):
@@ -42,6 +43,7 @@ class VTKVCSBackend(object):
     self.renderer = None
     self._plot_keywords = ['renderer',]
     self.numberOfPlotCalls = 0 
+    self.anim_stepper = None
     if renWin is not None:
       self.renWin = renWin
       if renWin.GetInteractor() is None and self.bg is False:
@@ -51,6 +53,25 @@ class VTKVCSBackend(object):
 #   def applicationFocusChanged(self):
 #       for plotApp in self.plotApps.values():
 #           if hasattr(plotApp, 'refresh'): plotApp.refresh()
+
+  def createAnimationStepper(self):
+        from animation_stepper import VTKAnimationStepper
+        self.anim_stepper = VTKAnimationStepper( self.renWin.GetInteractor() )
+        self.anim_stepper.StepAnimationSignal.connect( self._stepAnimation )
+
+  def _stepAnimation( self, step_index, **args ):
+        print " Step Animation [ %d ] " % step_index
+                                                     
+  def keyEvent(self, caller, event):
+        interactor = caller.GetInteractor()
+        key = interactor.GetKeyCode() 
+        keysym = interactor.GetKeySym()
+        shift = interactor.GetShiftKey()
+        print "key pressed: %s " % str( key )
+        if self.anim_stepper is not None:
+            if   key == 'a': self.anim_stepper.startAnimation()
+            elif key == 's': self.anim_stepper.stopAnimation()
+      
 
   def setAnimationStepper( self, stepper ):
       for plot in self.plotApps.values():

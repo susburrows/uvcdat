@@ -384,8 +384,8 @@ class DV3DPlot():
         pass
     
     def notifyStopAnimation(self): 
-        self.changeButtonActivations( [ ( 'Run', True ), ( 'Stop', False ) , ( 'Step', True ) ] ) 
-                           
+        self.changeButtonActivations( [ ( 'Run', True ), ( 'Stop', False ) , ( 'Step', True ) ] )                  
+                          
     def setInteractionState(self, caller, event):
         interactor = caller.GetInteractor()
         key = interactor.GetKeyCode() 
