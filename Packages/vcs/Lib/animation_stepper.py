@@ -47,7 +47,7 @@ class AnimationStepper:
     def __init__( self, **args ):
         self.animating = False
         self.time_index = 0
-        self.delay = args.get( 'delay', 0.0 )
+        self.delay = args.get( 'delay', 10 )
         self.StartAnimationSignal = SIGNAL('StartAnimationSignal')
         self.StopAnimationSignal = SIGNAL('StopAnimationSignal')
         self.StepAnimationSignal = SIGNAL('StepAnimationSignal')
