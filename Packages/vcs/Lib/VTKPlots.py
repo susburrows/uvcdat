@@ -43,7 +43,6 @@ class VTKVCSBackend(object):
     self.renderer = None
     self._plot_keywords = ['renderer',]
     self.numberOfPlotCalls = 0 
-    self.anim_stepper = None
     if renWin is not None:
       self.renWin = renWin
       if renWin.GetInteractor() is None and self.bg is False:
@@ -53,24 +52,16 @@ class VTKVCSBackend(object):
 #   def applicationFocusChanged(self):
 #       for plotApp in self.plotApps.values():
 #           if hasattr(plotApp, 'refresh'): plotApp.refresh()
-
-  def createAnimationStepper(self):
-        from animation_stepper import VTKAnimationStepper
-        self.anim_stepper = VTKAnimationStepper( self.renWin.GetInteractor() )
-        self.anim_stepper.StepAnimationSignal.connect( self._stepAnimation )
-
-  def _stepAnimation( self, step_index, **args ):
-        print " Step Animation [ %d ] " % step_index
-                                                     
+                                                                     
   def keyEvent(self, caller, event):
         interactor = caller.GetInteractor()
         key = interactor.GetKeyCode() 
         keysym = interactor.GetKeySym()
         shift = interactor.GetShiftKey()
         print "key pressed: %s " % str( key )
-        if self.anim_stepper is not None:
-            if   key == 'a': self.anim_stepper.startAnimation()
-            elif key == 's': self.anim_stepper.stopAnimation()
+        if self.canvas.anim_stepper is not None:
+            if   key == 'a': self.canvas.anim_stepper.startAnimation()
+            elif key == 's': self.canvas.anim_stepper.stopAnimation()
       
 
   def setAnimationStepper( self, stepper ):
@@ -328,6 +319,7 @@ class VTKVCSBackend(object):
           self.renWin.Render()
 
   def plot(self,data1,data2,template,gtype,gname,bg,*args,**kargs):
+    self.data = data1
     self.numberOfPlotCalls+=1
     if self.bg is None:
       if bg:

@@ -847,6 +847,7 @@ class Canvas(object,AutoAPI.AutoAPI):
         self._canvas_id = vcs.next_canvas_id
         self.ParameterChanged = SIGNAL( 'ParameterChanged' )
         vcs.next_canvas_id+=1
+        self.anim_stepper = None
         self.colormap = "default"
         self.backgroundcolor = 255,255,255
         ## default size for bg
@@ -2393,12 +2394,35 @@ Options:::
 
 
 
-    #def replot(self):
-    #    """ Clears and plots with last used plot arguments
-    #    """
-    #    self.clear()
-    #    self.plot(*self.__last_plot_actual_args, **self.__last_plot_keyargs)
+    def createAnimationStepper(self):
+        from animation_stepper import VTKAnimationStepper
+        self.anim_stepper = VTKAnimationStepper( self.backend.renWin.GetInteractor() )
+        self.anim_stepper.StepAnimationSignal.connect( self._stepAnimation )
 
+    def _stepAnimation( self, step_index, **args ):
+        print " Step Animation [ %d ] " % step_index
+        data = self.__last_plot_actual_args[0]
+        if data.ndim == 3:
+            self.replot( data[ step_index ] )
+        elif data.ndim == 4:
+            self.replot( data[step_index][0])
+        elif data.ndim == 5:
+            self.replot( data[step_index][0][0])
+                    
+    def replot( self, data ):
+        """ Clears and plots with last used plot arguments
+        """
+        print "clear"; sys.stdout.flush()
+        self.clear()
+        print "clear done"; sys.stdout.flush()
+        actual_args = list( self.__last_plot_actual_args )
+        actual_args[0] = data 
+        keyargs = self.__last_plot_keyargs
+        arglist = _determine_arg_list ( None, actual_args )
+        a = self.__plot( arglist, keyargs )
+        print "replot done"; sys.stdout.flush()
+
+ 
     ###########################################################################
     #                                                                         #
     # Plot wrapper for VCS.                                                   #
@@ -2524,7 +2548,13 @@ Options:::
 
 """
         self.__last_plot_actual_args = actual_args
+        try:
+            actual_var = actual_args[0]
+            file_name = actual_var.parent.uri
+            keyargs['cdmsfile'] = file_name
+        except: pass               
         self.__last_plot_keyargs = keyargs
+        
         passed_var = keyargs.get("variable",None)
         arglist = _determine_arg_list ( None, actual_args )
         if passed_var is not None:
@@ -2537,12 +2567,7 @@ Options:::
         except:
             sal = 1
 
-        try:
-            actual_var = actual_args[0]
-            file_name = actual_var.parent.uri
-            keyargs['cdmsfile'] = file_name
-        except:
-            pass
+
         
     #    try:
     #        if (self.canvas_gui.top_parent.menu.vcs_canvas_gui_settings_flg == 1): # Must be from VCDAT
@@ -2703,7 +2728,7 @@ Options:::
         assert isinstance(arglist[2],str)
         if not isinstance(arglist[3],vcsaddons.core.VCSaddon): assert isinstance(arglist[3],str)
         assert isinstance(arglist[4],str)
-
+        
         ##reset animation
         self.animate.create_flg = 0
 
@@ -2727,7 +2752,7 @@ Options:::
         doratio=str(keyargs.get('ratio',self.ratio)).strip().lower()
         if doratio[-1]=='t' and doratio[0]=='0' :
             if float(doratio[:-1])==0.: doratio='0'
-        
+                    
         ## Check for curvilinear grids, and wrap options !
         if arglist[0] is not None and arglist[1] is None and arglist[3]=="meshfill":
             g=arglist[0].getGrid()
