@@ -89,12 +89,6 @@ if __name__=='__main__':
     x=vcs.init()
     f=cdms2.open(sys.prefix+"/sample_data/clt.nc")
     data=f("clt")    # This will produce 120 frames, in the out frames, it will take them longer to produce.  
-
-    if data.ndim == 3:
-        for i in range(data.shape[0]):
-           print "i = ", i
-           x.plot(data[i])
-           x.clear()
                    
     x.plot(data) 
     x.createAnimationStepper()
