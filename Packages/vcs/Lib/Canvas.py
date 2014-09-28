@@ -2423,15 +2423,12 @@ Options:::
     def replot( self, data ):
         """ Clears and plots with last used plot arguments
         """
-        print "clear"; sys.stdout.flush()
         self.clear()
-        print "clear done"; sys.stdout.flush()
         actual_args = list( self.__last_plot_actual_args )
         actual_args[0] = data 
         keyargs = self.__last_plot_keyargs
         arglist = _determine_arg_list ( None, actual_args )
         a = self.__plot( arglist, keyargs )
-        print "replot done"; sys.stdout.flush()
 
  
     ###########################################################################
