@@ -1,50 +1,9 @@
 import vtk, traceback
-from weakref import WeakSet, WeakKeyDictionary
-import inspect, ast
-
-class SIGNAL(object):
-    
-    def __init__( self, name = None ):
-        self._functions = WeakSet()
-        self._methods = WeakKeyDictionary()
-        self._name = name
-
-    def __call__(self, *args, **kargs):
-        # Call handler functions
-        for func in self._functions:
-            func(*args, **kargs)
-
-        # Call handler methods
-        for obj, funcs in self._methods.items():
-            for func in funcs:
-                func(obj, *args, **kargs)
-
-    def connect(self, slot):
-        if inspect.ismethod(slot):
-            if slot.__self__ not in self._methods:
-                self._methods[slot.__self__] = set()
-
-            self._methods[slot.__self__].add(slot.__func__)
-
-        else:
-            self._functions.add(slot)
-
-    def disconnect(self, slot):
-        if inspect.ismethod(slot):
-            if slot.__self__ in self._methods:
-                self._methods[slot.__self__].remove(slot.__func__)
-        else:
-            if slot in self._functions:
-                self._functions.remove(slot)
-
-    def clear(self):
-        self._functions.clear()
-        self._methods.clear()
-
 
 class AnimationStepper:
     
     def __init__( self, **args ):
+        from Canvas import SIGNAL
         self.animating = False
         self.time_index = 0
         self.delay = args.get( 'delay', 10 )
@@ -129,8 +88,15 @@ if __name__=='__main__':
     import sys,cdms2,vcs
     x=vcs.init()
     f=cdms2.open(sys.prefix+"/sample_data/clt.nc")
-    s=f("clt")    # This will produce 120 frames, in the out frames, it will take them longer to produce.   
-    x.plot(s) 
-    x.backend.createAnimationStepper()   
+    data=f("clt")    # This will produce 120 frames, in the out frames, it will take them longer to produce.  
+
+    if data.ndim == 3:
+        for i in range(data.shape[0]):
+           print "i = ", i
+           x.plot(data[i])
+           x.clear()
+                   
+    x.plot(data) 
+    x.createAnimationStepper()
     x.interact()
     
