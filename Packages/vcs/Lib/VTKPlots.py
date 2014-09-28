@@ -43,6 +43,7 @@ class VTKVCSBackend(object):
     self.renderer = None
     self._plot_keywords = ['renderer',]
     self.numberOfPlotCalls = 0 
+    self.clickRenderer = None
     if renWin is not None:
       self.renWin = renWin
       if renWin.GetInteractor() is None and self.bg is False:
@@ -125,38 +126,51 @@ class VTKVCSBackend(object):
                 st+="Var: %s\nX = %g\nY[%i] = %g\nValue: %g" % (d.array[0].id,X,I,Y,V)
         except:
             st+="Var: %s\nX=%g\nY=%g\nValue = N/A" % (d.array[0].id,X,Y)
-    ren = vtk.vtkRenderer()
-    ren.SetBackground(.96,.96,.86)
-    ren.SetViewport(x,y,min(x+.2,1.),min(y+.2,1))
-    ren.SetLayer(self.renWin.GetNumberOfLayers()-1)
-    a=vtk.vtkTextActor()
-    a.SetInput(st)
-    p=a.GetProperty()
-    p.SetColor(0,0,0)
+    if self.clickRenderer == None:
+        ren = vtk.vtkRenderer()
+        ren.SetBackground(.96,.96,.86)
+        ren.SetLayer(self.renWin.GetNumberOfLayers()-1)
+        self.textActor=vtk.vtkTextActor()
+        self.textActor.SetInput(st)
+        p=self.textActor.GetProperty()
+        p.SetColor(0,0,0)
+        m2d=vtk.vtkPolyDataMapper2D()
+        self.TextBoxActor=vtk.vtkActor2D()
+        self.TextBoxActor.SetMapper(m2d)
+        self.TextBoxActor.GetProperty().SetColor(.93,.91,.67)
+        ren.AddActor(self.TextBoxActor)
+        ren.AddActor(self.textActor)
+        self.clickRenderer= ren
+        self.renWin.AddRenderer(ren)
+
+    vp = [ x, y, min(x+.2,1.), min(y+.2,1) ]
+    print "Set Viewport ", str( vp )
+    self.clickRenderer.SetViewport(*vp)
+    self.textActor.SetInput(st)
     bb = [0,0,0,0]
-    a.GetBoundingBox(ren,bb)
-    ps=vtk.vtkPlaneSource()
-    ps.SetCenter(bb[0],bb[2],0.)
-    ps.SetPoint1(bb[1],bb[2],0.)
-    ps.SetPoint2(bb[0],bb[3],0.)
-    ps.Update()
-    m2d=vtk.vtkPolyDataMapper2D()
-    m2d.SetInputConnection(ps.GetOutputPort())
-    a2d=vtk.vtkActor2D()
-    a2d.SetMapper(m2d)
-    a2d.GetProperty().SetColor(.93,.91,.67)
-    ren.AddActor(a2d)
-    ren.AddActor(a)
-    ren.ResetCamera()
-    self.clickRenderer= ren
-    self.renWin.AddRenderer(ren)
+    self.textActor.GetBoundingBox( self.clickRenderer, bb )
+    print "Set BBox ", str( bb )
+    textActorSource=vtk.vtkPlaneSource()
+    textActorSource.SetCenter(bb[0],bb[2],0.)
+    textActorSource.SetPoint1(bb[1],bb[2],0.)
+    textActorSource.SetPoint2(bb[0],bb[3],0.)
+    self.TextBoxActor.GetMapper().SetInputConnection( textActorSource.GetOutputPort() )
+    print " Center: %s p1: %s, p2: %s " % ( str([bb[0],bb[2]]), str([bb[1],bb[3]]), str([bb[0],bb[3]]) )
+    textActorSource.Update()  
+    self.textActor.VisibilityOn ()
+    self.TextBoxActor.VisibilityOn ()
+    self.clickRenderer.ResetCamera()       
     self.renWin.Render()
 
   def leftButtonReleaseEvent(self,obj,event):
-    self.clickRenderer.RemoveAllViewProps()
-    self.clickRenderer.Render()
-    self.renWin.RemoveRenderer(self.clickRenderer)
+    self.textActor.VisibilityOff ()
+    self.TextBoxActor.VisibilityOff ()
+#    self.clickRenderer.Modified()
     self.renWin.Render()
+#    self.clickRenderer.RemoveAllViewProps()
+#    self.clickRenderer.Render()
+#    self.renWin.RemoveRenderer(self.clickRenderer)
+#    self.renWin.Render()
 
   def configureEvent(self,obj,ev):
     sz = self.renWin.GetSize()
