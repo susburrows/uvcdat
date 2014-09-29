@@ -2419,9 +2419,9 @@ Options:::
         time_axis = data0.getTime()
         nt = len( time_axis )
         time_index = step_index % nt
-        time_slice_data0 = data0( cdms2.timeslice(time_index,time_index+1) )
+        time_slice_data0 = data0( cdms2.timeslice(time_index,time_index+1), squeeze=1  )
         data1 = self.__last_plot_actual_args[1] if ( len( self.__last_plot_actual_args ) > 1 ) else None      
-        time_slice_data1 = data1( cdms2.timeslice(time_index,time_index+1) ) if ( data1 is not None ) else None
+        time_slice_data1 = data1( cdms2.timeslice(time_index,time_index+1), squeeze=1  ) if ( data1 is not None ) else None
         self.replot( time_slice_data0, time_slice_data1 )
 
                     
