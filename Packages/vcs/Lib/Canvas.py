@@ -2415,21 +2415,23 @@ Options:::
 
     def _stepAnimation( self, step_index, **args ):
         print " Step Animation [ %d ] " % step_index
-        data = self.__last_plot_actual_args[0]
-        if data.ndim == 3:
-            self.replot( data[ step_index ] )
-        elif data.ndim == 4:
-            self.replot( data[step_index][0])
-        elif data.ndim == 5:
-            self.replot( data[step_index][0][0])
+        data0 = self.__last_plot_actual_args[0]
+        time_axis = data0.getTime()
+        nt = len( time_axis )
+        time_index = step_index % nt
+        time_slice_data0 = data0( cdms2.timeslice(time_index,time_index+1) )
+        data1 = self.__last_plot_actual_args[1] if ( len( self.__last_plot_actual_args ) > 1 ) else None      
+        time_slice_data1 = data1( cdms2.timeslice(time_index,time_index+1) ) if ( data1 is not None ) else None
+        self.replot( time_slice_data0, time_slice_data1 )
+
                     
-    def replot( self, data=None ):
+    def replot( self, data0=None, data1=None ):
         """ Clears and plots with last used plot arguments
         """
         self.clear()
         actual_args = list( self.__last_plot_actual_args )
-        if data is not None: 
-            actual_args[0] = data 
+        if data0 is not None:  actual_args[0] = data0 
+        if data1 is not None:  actual_args[1] = data1 
         keyargs = self.__last_plot_keyargs
         arglist = _determine_arg_list ( None, actual_args )
         a = self.__plot( arglist, keyargs )
