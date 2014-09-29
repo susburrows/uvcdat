@@ -1,4 +1,4 @@
-import vtk, traceback
+import vtk, traceback, time
 
 class AnimationStepper:
     
@@ -10,6 +10,7 @@ class AnimationStepper:
         self.StartAnimationSignal = SIGNAL('StartAnimationSignal')
         self.StopAnimationSignal = SIGNAL('StopAnimationSignal')
         self.StepAnimationSignal = SIGNAL('StepAnimationSignal')
+        self.clockTimeStamp = None
                 
     def setAnimationDelay(self, delay_val ):
         self.delay = delay_val
@@ -19,6 +20,7 @@ class AnimationStepper:
     
     def startAnimation(self):
         self.animating = True
+        self.clockTimeStamp = time.clock()
         self.notifyStartAnimation()
         self.runAnimation()
 
@@ -41,6 +43,9 @@ class AnimationStepper:
         # Notify listeners that animation has stepped.
         self.StepAnimationSignal( self.time_index, **args )
         self.time_index = self.time_index + 1
+        t1 = time.clock()
+        print "Animation DT = %f" % ( t1 - self.clockTimeStamp )
+        self.clockTimeStamp = t1
 
     def notifyStartAnimation(self, **args): 
         # Notify listeners that animation has started.
