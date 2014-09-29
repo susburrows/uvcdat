@@ -969,3 +969,18 @@ class AnimationController(animate_obj_old):
 ############################################################################
 #        END OF FILE                                                       #
 ############################################################################
+
+
+
+if __name__ == "__main__":
+
+    import sys, vcs, cdms2
+    cdmsfile=cdms2.open(sys.prefix+"/sample_data/clt.nc")
+    d=cdmsfile('clt')
+    x=vcs.init()
+    x.plot(d)
+    x.clear()
+    
+    x.interact()
+
+

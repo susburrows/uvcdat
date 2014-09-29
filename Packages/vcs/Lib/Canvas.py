@@ -2396,8 +2396,11 @@ Options:::
 
     def createAnimationStepper(self):
         from animation_stepper import VTKAnimationStepper
-        self.anim_stepper = VTKAnimationStepper( self.backend.renWin.GetInteractor() )
-        self.anim_stepper.StepAnimationSignal.connect( self._stepAnimation )
+        if self.anim_stepper is None:
+            self.anim_stepper = VTKAnimationStepper( self.backend.renWin.GetInteractor() )
+            self.anim_stepper.StepAnimationSignal.connect( self._stepAnimation )
+        else:
+            self.anim_stepper.updateInteractor( self.backend.renWin.GetInteractor() )
 
     def _stepAnimation( self, step_index, **args ):
         print " Step Animation [ %d ] " % step_index
@@ -2409,12 +2412,13 @@ Options:::
         elif data.ndim == 5:
             self.replot( data[step_index][0][0])
                     
-    def replot( self, data ):
+    def replot( self, data=None ):
         """ Clears and plots with last used plot arguments
         """
         self.clear()
         actual_args = list( self.__last_plot_actual_args )
-        actual_args[0] = data 
+        if data is not None: 
+            actual_args[0] = data 
         keyargs = self.__last_plot_keyargs
         arglist = _determine_arg_list ( None, actual_args )
         a = self.__plot( arglist, keyargs )
@@ -2595,6 +2599,8 @@ Options:::
 #            self.canvas_gui.dialog.dialog.transient( self.canvas_gui.top_parent )
 #            self.canvas_gui.show_data_plot_info( self.canvas_gui.parent, self )
 
+        self.createAnimationStepper()
+        
         return a
     plot.__doc__ = plot.__doc__ % (plot_2_1D_options, plot_keywords_doc,graphics_method_core,axesconvert,plot_2_1D_input, plot_output)
         

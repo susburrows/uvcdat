@@ -58,9 +58,14 @@ class VTKAnimationStepper( AnimationStepper ):
 
     def __init__( self, interactor,  **args ):
         AnimationStepper.__init__( self, **args )
-        self.renderWindowInteractor = interactor
-        self.renderWindowInteractor.AddObserver( 'TimerEvent', self.processTimerEvent )  
-        self.animationTimerId = -1    
+        self.renderWindowInteractor = None
+        self.animationTimerId = -1 
+        self.updateInteractor( interactor )
+        
+    def updateInteractor( self, interactor ): 
+        if  self.renderWindowInteractor <> interactor:
+            self.renderWindowInteractor = interactor
+            self.renderWindowInteractor.AddObserver( 'TimerEvent', self.processTimerEvent )  
                               
     def stopAnimation(self):
         AnimationStepper.stopAnimation(self)
@@ -91,6 +96,5 @@ if __name__=='__main__':
     data=f("clt")    # This will produce 120 frames, in the out frames, it will take them longer to produce.  
                    
     x.plot(data) 
-    x.createAnimationStepper()
     x.interact()
     
