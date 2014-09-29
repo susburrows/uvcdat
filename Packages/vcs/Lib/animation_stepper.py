@@ -1,5 +1,22 @@
 import vtk, traceback, time
 
+
+
+class AnimationProfiler:
+    
+    def __init__( self, **args ):
+        self.currentTimeStamp = None
+        self.times = []
+        self.stampTime()
+        
+    def stampTime(self):
+        self.times.append( time.clock() )
+        
+    def printTimes( self, msg ):
+        timeStr = " ".join( [ ( "%.2f" % ( self.times[i+1]-self.times[i] ) ) for i in len(self.times)-1 ] )
+        print " %s : %s, total = %.2f " % ( msg, timeStr, (self.times[-1]-self.times[0]) )
+        
+    
 class AnimationStepper:
     
     def __init__( self, **args ):

@@ -2414,7 +2414,6 @@ Options:::
             self.anim_stepper.updateInteractor( self.backend.renWin.GetInteractor() )
 
     def _stepAnimation( self, step_index, **args ):
-        print " Step Animation [ %d ] " % step_index
         data0 = self.__last_plot_actual_args[0]
         time_axis = data0.getTime()
         nt = len( time_axis )

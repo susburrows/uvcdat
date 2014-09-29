@@ -10,7 +10,7 @@ import os, traceback, sys
 import cdms2
 import DV3D
 import MV2
-import cdtime
+import cdtime, time
 
 def smooth(x,beta,window_len=11):
    """ kaiser window smoothing """
@@ -208,19 +208,21 @@ class VTKVCSBackend(object):
     if self.renWin is None: #Nothing to clear
           return
     renderers = self.renWin.GetRenderers()
-#    plot_renderers = [ id(g.plot.renderer) for g in self.plotApps.values() ]
-#    print " ------------------------------------ ------------------------------------  CLEAR: %s  ------------------------------------ ------------------------------------ " % str( plot_renderers )
+    plot_renderers = [ id(g.plot.renderer) for g in self.plotApps.values() ]
     renderers.InitTraversal()
     ren = renderers.GetNextItem()
     hasValidRenderer = True if ren is not None else False
+    removedRens = 0
     while ren is not None:
         if not ren in self.plotRenderers:
             ren.RemoveAllViewProps()
-            if not ren.GetLayer()==0:
-              self.renWin.RemoveRenderer(ren)
+#            if not ren.GetLayer()==0:
+            self.renWin.RemoveRenderer(ren)
+            removedRens = removedRens + 1
         ren = renderers.GetNextItem()
-    if hasValidRenderer:
+    if hasValidRenderer:  
         self.renWin.Render()
+#    print " ------------------------------------ ------------------------------------  CLEAR: %s [%d]  ------------------------------------  " % ( str( plot_renderers), removedRens )
     self.numberOfPlotCalls = 0
 
   def createDefaultInteractor( self, ren=None ):
@@ -683,6 +685,7 @@ class VTKVCSBackend(object):
 
   def plot2D(self,data1,data2,tmpl,gm):
     #Preserve time and z axis for plotting these inof in rendertemplate
+    t0 = time.clock()
     t = data1.getTime()
     if data1.ndim>2:
         z = data1.getAxis(-3)
@@ -713,6 +716,7 @@ class VTKVCSBackend(object):
     lut = vtk.vtkLookupTable()
     mn,mx=vcs.minmax(data1)
     #Ok now we have grid and data let's use the mapper
+    t1 = time.clock()
     mapper = vtk.vtkPolyDataMapper()
     legend = None
     if isinstance(gm,(meshfill.Gfm,boxfill.Gfb)):
@@ -724,7 +728,8 @@ class VTKVCSBackend(object):
       else:
         geoFilter.SetInputData(ug)
       geoFilter.Update()
-
+      
+    t2 = time.clock()
     if isinstance(gm,(isofill.Gfi,isoline.Gi,meshfill.Gfm)) or \
         (isinstance(gm,boxfill.Gfb) and gm.boxfill_type=="custom"):
 
@@ -757,7 +762,6 @@ class VTKVCSBackend(object):
           cot.SetInputData(sFilter.GetOutput())
         else:
           cot.SetInputData(ug)
-
 
       levs = gm.levels
       if (isinstance(gm,isoline.Gi) and numpy.allclose( levs[0],[0.,1.e20])) or numpy.allclose(levs,1.e20):
@@ -899,7 +903,7 @@ class VTKVCSBackend(object):
           #T.SetInputConnection(png.GetOutputPort())
           if isinstance(gm,isofill.Gfi):
               mappers.append([mapper,])
-
+              
     else: #Boxfill (non custom)/Meshfill
       if isinstance(gm,boxfill.Gfb):
         if numpy.allclose(gm.level_1,1.e20) or numpy.allclose(gm.level_2,1.e20):
@@ -953,7 +957,8 @@ class VTKVCSBackend(object):
           mapper.SetInputConnection(geoFilter.GetOutputPort())
       else:
           mapper.SetInputConnection(geoFilter2.GetOutputPort())
-
+          
+    t3 = time.clock()
     if mappers == []: # ok didn't need to have special banded contours
       mappers=[mapper,]
       ## Colortable bit
@@ -981,6 +986,7 @@ class VTKVCSBackend(object):
         mappers.insert(0,missingMapper)
 
     x1,x2,y1,y2 = vcs2vtk.getRange(gm,xm,xM,ym,yM)
+    t4 = time.clock()
 
     if tmpl.data.priority != 0:
       # And now we need actors to actually render this thing
@@ -1004,7 +1010,8 @@ class VTKVCSBackend(object):
         self.setLayer(ren,tmpl.data.priority)
         ren.AddActor(act)
         vcs2vtk.fitToViewport(act,ren,[tmpl.data.x1,tmpl.data.x2,tmpl.data.y1,tmpl.data.y2],wc=[x1,x2,y1,y2],geo=geo)
-
+        
+    t5 = time.clock()
     if isinstance(gm,meshfill.Gfm):
       tmpl.plot(self.canvas,data1,gm,
                 bg=self.bg,
@@ -1028,11 +1035,15 @@ class VTKVCSBackend(object):
             levs.append(1.e20)
 
       self.renderColorBar(tmpl,levs,cols,legend,cmap)
+      
+    t6 = time.clock()
     if self.canvas._continents is None:
       continents = False
     if continents:
         projection = vcs.elements["projection"][gm.projection]
         self.plotContinents(x1,x2,y1,y2,projection,wrap,tmpl)
+        
+#    print " Plot2D: %.2f %.2f %.2f %.2f %.2f %.2f %.2f " % ( (t1-t0), (t2-t1), (t3-t2), (t4-t3), (t5-t4), (t6-t5), (t6-t0) )
 
   def plotContinents(self,x1,x2,y1,y2,projection,wrap,tmpl):
       contData = vcs2vtk.prepContinents(self.canvas._continents)
@@ -1062,7 +1073,9 @@ class VTKVCSBackend(object):
         ren.AddActor(contActor)
 
   def renderTemplate(self,tmpl,data,gm,taxis,zaxis):
+    t0 = time.clock()
     tmpl.plot(self.canvas,data,gm,bg=self.bg)
+    t1 = time.clock()
     if taxis is not None:
         tstr = str(cdtime.reltime(taxis[0],taxis.units).tocomp(taxis.getCalendar()))
         #ok we have a time axis let's display the time
@@ -1112,6 +1125,8 @@ class VTKVCSBackend(object):
             tt = vcs.elements["texttable"][tt]
             to = vcs.elements["textorientation"][to]
             vcs2vtk.genTextActor(ren,to=to,tt=tt)
+    t2 = time.clock()
+    print " renderTemplate: %.2f %.2f %.2f  " % ( (t1-t0), (t2-t1), (t2-t0) )
 
 
   def renderColorBar(self,tmpl,levels,colors,legend,cmap):

@@ -874,12 +874,12 @@ class P(object):
           f.close()
            
     ## Adding the drawing functionnality to plot all these attributes on the Canvas
-
     def drawTicks(self,slab,gm,x,axis,number,vp,wc,bg=0,X=None,Y=None,**kargs):
         """Draws the ticks for the axis x number number
         using the label passed by the graphic  method
         vp and wc are from the actual canvas, they have been reset when they get here...
         """
+        
         kargs["donotstoredisplay"]=True
         if X is None:
           X=slab.getAxis(-1)
@@ -1005,10 +1005,12 @@ class P(object):
         objlabl=getattr(self,axis+'label'+number)
         # the following to make sure we have a unique name,
         # i put them together assuming it would be faster
+        
         ticks=x.createline(source=obj.line)
         tt=x.createtext(Tt_source=objlabl.texttable,To_source=objlabl.textorientation)
         ticks.priority=obj.priority
         tt.priority=objlabl.priority
+        
         # initialize the list of values
         tstring=[]
         xs=[]
@@ -1066,6 +1068,7 @@ class P(object):
              ticks.x=xs
              ticks.y=ys
              displays.append(x.line(ticks,bg=bg,**kargs))
+        
         return displays
    
 
@@ -1235,6 +1238,7 @@ class P(object):
     def plot(self,x,slab,gm,bg=0,min=None,max=None,X=None,Y=None,**kargs):
         """ This plots the template stuff on the Canvas, it needs a slab and a graphic method
         returns a list containing all the displays used"""
+
         displays = []
         kargs["donotstoredisplay"]=True
         # now remembers the viewport and worldcoordinates in order to reset them later
@@ -1260,7 +1264,7 @@ class P(object):
 
         if gm=='taylordiagram':
              attributes=attributes[:-3]
-
+        
         for s in attributes: # loop through various section of the template object
             if hasattr(slab,s):
                 if s=='id':
@@ -1287,12 +1291,15 @@ class P(object):
                 displays.append(x.text(tt,bg=bg,**kargs))
 
 
+        
         # Do the tickmarks/labels
         if gm!='taylordiagram':
              displays+=self.drawTicks(slab,gm,x,axis='x',number='1',vp=vp,wc=wc,bg=bg,X=X,Y=Y,**kargs)
              displays+=self.drawTicks(slab,gm,x,axis='x',number='2',vp=vp,wc=wc,bg=bg,X=X,Y=Y,**kargs)
              displays+=self.drawTicks(slab,gm,x,axis='y',number='1',vp=vp,wc=wc,bg=bg,X=X,Y=Y,**kargs)
              displays+=self.drawTicks(slab,gm,x,axis='y',number='2',vp=vp,wc=wc,bg=bg,X=X,Y=Y,**kargs)
+             
+        
 
         # Do the boxes and lines
         b=self.box1
@@ -1326,6 +1333,8 @@ class P(object):
              l.y=[b.y1,b.y1,b.y2,b.y2,b.y1]
              l.priority=b.priority
              displays.append(x.line(l,bg=bg,**kargs))
+
+        
 
         b=self.line1
         if b.priority!=0:
@@ -1364,6 +1373,7 @@ class P(object):
         # but Dean doesn't allow to set it back to some of these values (None)!
         x.viewport=vp
         x.worldcoordinate=wc
+        
         return displays
 
     def drawColorBar(self,colors,levels,legend=None,ext_1='n',ext_2='n',x=None,bg=0,priority=None,cmap=None,**kargs):
