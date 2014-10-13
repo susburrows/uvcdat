@@ -275,11 +275,11 @@ class ConfigManager:
         param = self.getParameter( param_name, **args )
         if ( param == None ): return None 
         if param_name == 'Camera':
-            value = str( param.values )          
+            svalue = str( param.values )          
         else:
-            value = param.getValues()
-            if param.getState(): value = value + ", vcs.on"
-        return value
+            svalue = str( param.getValues() )
+            if param.getState(): svalue = svalue + ", vcs.on"
+        return svalue
          
     def getConfigurableFunction(self, name, **args ):
         rv = self.configurableFunctions.get( name, None )

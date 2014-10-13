@@ -374,9 +374,10 @@ class DV3DPlot():
         return self.cfgManager.getConfigurationParms( **args )
 
     def printParameterValues(self):
+        self.recordCamera()
         parameter_names = list( self.cfgManager.getParameterList() ) + PlotButtonNames
         for param_name in parameter_names:
-            print '%s = %s\n' % ( param_name, self.cfgManager.getParameterValue( param_name ) ) 
+            print '%s = %s' % ( param_name, self.cfgManager.getParameterValue( param_name ) ) 
             
     def processKeyPressHandler( self, key, eventArgs ):
 #        print " processKeyPress: ", str( key )
