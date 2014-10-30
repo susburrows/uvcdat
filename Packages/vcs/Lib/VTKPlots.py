@@ -997,7 +997,7 @@ class VTKVCSBackend(object):
         # (we need one for each mapper because of cmaera flips)
         ren = self.createRenderer()
         self.renWin.AddRenderer(ren)
-        self.setLayer(ren,tmpl.data.priority)
+        self.setLayer(ren,tmpl.data.priority + 1)
         ren.AddActor(act)
         vcs2vtk.fitToViewport(act,ren,[tmpl.data.x1,tmpl.data.x2,tmpl.data.y1,tmpl.data.y2],wc=[x1,x2,y1,y2],geo=geo)
 
