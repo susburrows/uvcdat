@@ -630,7 +630,6 @@ class AnimationRenderFrame(multiprocessing.Process):
         kargs = []
       displays,pix = self.controller.render_frame(self.args[i], frameNumber, kargs, self.create_canvas)
       self.Queue.put(pix)
-      print "SELF PIX IS NOW:",self,self.Queue.qsize()
       if self._really_used==[]:
         for d in displays:
           self._really_used.append([d._gettemplate(),d._getg_type(),d._getg_name()])
@@ -959,7 +958,6 @@ class AnimationController(animate_obj_old):
         self.animation_seed = numpy.random.randint(10000000000)
     fn = os.path.join(os.environ["HOME"],".uvcdat",
                       "__uvcdat_%i_%.9i.png" % (self.animation_seed,frame_num))
-    print "FNM:",fn
 
     #BB: this clearing and replotting somehow fixes vcs internal state
     # and prevents segfaults when running multiple animations
