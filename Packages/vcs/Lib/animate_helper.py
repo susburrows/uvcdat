@@ -663,13 +663,10 @@ class AnimationCreate(StoppableThread):
       ## Now wait for these 5 frames to be rendered before moving on
       for j in range(min(self.controller.numberRenderers,len(all_args))):
         AFrame[j].join()
-      for j in range(min(self.controller.numberRenderers,len(all_args))):
-        print "PIX FOR:",j,Queue.qsize()
 
     for i in range(Queue.qsize()):
       self.controller.animation_files.append(Queue.get(i))
     self.controller.animation_files.sort()
-    print "OK we got sorted:",self.controller.animation_files
 
     self.controller.restore_min_max()
 
