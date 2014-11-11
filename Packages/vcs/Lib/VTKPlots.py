@@ -177,7 +177,7 @@ class VTKVCSBackend(object):
       self.createLogo()
     self.scaleLogo()
 
-  def clear(self):
+  def clear(self,update=True):
     if self.renWin is None: #Nothing to clear
           return
     renderers = self.renWin.GetRenderers()
@@ -192,7 +192,7 @@ class VTKVCSBackend(object):
             if not ren.GetLayer()==0:
               self.renWin.RemoveRenderer(ren)
         ren = renderers.GetNextItem()
-    if hasValidRenderer and self.renWin.IsDrawable():
+    if update and hasValidRenderer and self.renWin.IsDrawable():
         self.renWin.Render()
     self.numberOfPlotCalls = 0
     self._renderers = {}
@@ -431,7 +431,7 @@ class VTKVCSBackend(object):
       self.createLogo()
     sz = self.renWin.GetSize()
     self.scaleLogo()
-    if not kargs.get("donotstoredisplay",False):
+    if not kargs.get("donotstoredisplay",False) and self.bg:
       self.renWin.Render()
     return returned_kargs
 
@@ -1252,6 +1252,7 @@ class VTKVCSBackend(object):
     cam.SetFocalPoint(xc+xoff,yc+yoff,0.)
     cam.SetPosition(xc+xoff,yc+yoff,d)
     ren.AddActor(a)
+    self.clear(update=False)
     self.renWin.AddRenderer(ren)
     self.renWin.Render()
     return

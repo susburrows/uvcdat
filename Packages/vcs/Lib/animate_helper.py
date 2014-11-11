@@ -607,31 +607,30 @@ class AnimationCreateParams(object):
     self.a_max = a_max
     self.axis = axis
 
-class AnimationCreate(StoppableThread):
-  def __init__(self, controller):
-    StoppableThread.__init__(self)
+#class AnimationRenderFrame(StoppableThread):
+import multiprocessing
+class AnimationRenderFrame(multiprocessing.Process):
+  def __init__(self, controller, frames, Queue):
+    multiprocessing.Process.__init__(self)
     self.controller = controller
-    
-  def run(self):
-    self.controller.initialize_create_canvas()
-    self.controller.set_anim_min_max()
-    all_args = self.controller.get_all_frame_args()
-    self.controller.reset_file_paths()
+    self.create_canvas = controller.create_canvas[frames[0]%self.controller.numberRenderers]
+    self.frames = frames
+    self.args = controller.get_all_frame_args()[frames[0]::self.controller.numberRenderers]
+    self.Queue = Queue
 
+  def run(self):
     self._really_used = [] 
     self._backend_kargs = []
-    for i, args in enumerate(all_args):
-      if self.is_stopped():
-        break
-      self.wait_if_paused()
-      # print "RENDERING FRAME", i, "OF", len(all_args)
+    for i,frameNumber in enumerate(self.frames):
       if self._really_used!=[]:
-        for j,a in enumerate(args):
-          args[j]=a[:-3]+self._really_used[j]
+        for j,a in enumerate(self.args[i]):
+          self.args[i][j]=a[:-3]+self._really_used[j]
           kargs = self._backend_kargs
       else:
         kargs = []
-      displays = self.controller.render_frame(args, i, kargs)
+      displays,pix = self.controller.render_frame(self.args[i], frameNumber, kargs, self.create_canvas)
+      self.Queue.put(pix)
+      print "SELF PIX IS NOW:",self,self.Queue.qsize()
       if self._really_used==[]:
         for d in displays:
           self._really_used.append([d._gettemplate(),d._getg_type(),d._getg_name()])
@@ -640,6 +639,38 @@ class AnimationCreate(StoppableThread):
       # this is how you allow the GUI to process events during
       # animation creation
       time.sleep(0.001)
+
+class AnimationCreate(StoppableThread):
+  def __init__(self, controller):
+    StoppableThread.__init__(self)
+    self.controller = controller
+
+  def run(self):
+    self.controller.initialize_create_canvas()
+    self.controller.set_anim_min_max()
+    all_args = self.controller.get_all_frame_args()
+    self.controller.reset_file_paths()
+
+    #for i, args in enumerate(all_args):
+    if not self.is_stopped():
+
+      self.wait_if_paused()
+      AFrame=[]
+      Queue = multiprocessing.Queue()
+      for j in range(min(self.controller.numberRenderers,len(all_args))):
+        AFrame.append(  AnimationRenderFrame(self.controller,range(j,len(all_args),self.controller.numberRenderers),Queue) )
+        AFrame[j].start()
+      ## Now wait for these 5 frames to be rendered before moving on
+      for j in range(min(self.controller.numberRenderers,len(all_args))):
+        AFrame[j].join()
+      for j in range(min(self.controller.numberRenderers,len(all_args))):
+        print "PIX FOR:",j,Queue.qsize()
+
+    for i in range(Queue.qsize()):
+      self.controller.animation_files.append(Queue.get(i))
+    self.controller.animation_files.sort()
+    print "OK we got sorted:",self.controller.animation_files
+
     self.controller.restore_min_max()
 
     self.controller.animation_created = True
@@ -715,6 +746,8 @@ class AnimationPlayback(StoppableThread):
       self.controller.signals.stopped.emit(True)
 
 class AnimationController(animate_obj_old):
+  def __del__(self):
+    print "We come here to delete crap"
   def __init__(self, vcs_self):
     animate_obj_old.__init__(self, vcs_self)
     self.create_thread = None
@@ -729,6 +762,7 @@ class AnimationController(animate_obj_old):
     self.playback_params = AnimationPlaybackParams()
     # GUI will set these if available
     self.signals = None
+    self.numberRenderers = 16
 
   def set_signals(self, signals):
     self.signals = signals
@@ -797,21 +831,24 @@ class AnimationController(animate_obj_old):
     return len(self.animation_files)
 
   def initialize_create_canvas(self):
-    # create a new canvas for each frame
-    self.create_canvas = vcs.init()
-    self.create_canvas.setcolormap(self.vcs_self.getcolormapname())
+    self.create_canvas=[]
+    for i in range(self.numberRenderers):
+      # create a new canvas for each frame
+      create_canvas = vcs.init()
+      create_canvas.setcolormap(self.vcs_self.getcolormapname())
 
-    alen = None
-    # !!! Using self.vcs_self.canvasinfo() segfaults on Mac OS X !!!
-    # dims = self.vcs_self.canvasinfo()
-    dims = self.canvas_info
-    if dims['height']<500:
-        factor = 2
-    else:
-        factor=1
-    self.create_canvas.setbgoutputdimensions(width=dims['width']*factor,
-                                             height=dims['height']*factor,
-                                             units='pixel')
+      alen = None
+      # !!! Using self.vcs_self.canvasinfo() segfaults on Mac OS X !!!
+      # dims = self.vcs_self.canvasinfo()
+      dims = self.canvas_info
+      if dims['height']<500:
+          factor = 2
+      else:
+          factor=1
+      create_canvas.setbgoutputdimensions(width=dims['width']*factor,
+                                          height=dims['height']*factor,
+                                          units='pixel')
+      self.create_canvas.append(create_canvas)
     
   def set_anim_min_max(self):
     # Save the min and max values for the graphics methods.
@@ -920,18 +957,18 @@ class AnimationController(animate_obj_old):
             self.animation_files = []
         self.animation_seed = None
 
-  def render_frame(self, frame_args, frame_num, frame_kargs=[]):
+  def render_frame(self, frame_args, frame_num, frame_kargs=[], create_canvas = None):
     if self.animation_seed is None:
         self.animation_seed = numpy.random.randint(10000000000)
     fn = os.path.join(os.environ["HOME"],".uvcdat",
-                      "__uvcdat_%i_%i.png" % (self.animation_seed,frame_num))
-    self.animation_files.append(fn)
+                      "__uvcdat_%i_%.9i.png" % (self.animation_seed,frame_num))
+    print "FNM:",fn
 
     #BB: this clearing and replotting somehow fixes vcs internal state
     # and prevents segfaults when running multiple animations
     #self.vcs_self.replot()
 
-    self.create_canvas.clear()
+    create_canvas.clear()
     displays = []
     #checks = ["template","marker","texttable","textorientation","boxfill","isofill","isoline","line","textcombined"]
     #pre = {}
@@ -942,7 +979,8 @@ class AnimationController(animate_obj_old):
           kargs = frame_kargs[iarg]
         else:
           kargs={}
-        displays.append(self.create_canvas.plot(*args, bg=1, **kargs))
+        d = create_canvas.plot(*args, bg=1, **kargs)
+        displays.append(d)
     #post={}
     #for a in checks:
     #  post[a]=len(vcs.elements[a])
@@ -950,13 +988,13 @@ class AnimationController(animate_obj_old):
     #  if pre[a]!=post[a]:
     #    print "Created: %i %s" % (post[a]-pre[a],a)
 
-    self.create_canvas.png(fn,draw_white_background=1)
-    return displays
+    create_canvas.png(fn,draw_white_background=1)
+    return displays, fn
 
   def draw_frame(self, frame_num=None):
     if frame_num is not None:
       self.frame_num = frame_num
-    self.vcs_self.backend.clear()
+    #self.vcs_self.backend.clear()
     self.vcs_self.put_png_on_canvas(
       self.animation_files[self.frame_num],
       self.playback_params.zoom_factor,
