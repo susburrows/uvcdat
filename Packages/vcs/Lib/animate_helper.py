@@ -613,7 +613,6 @@ class AnimationRenderFrame(multiprocessing.Process):
   def __init__(self, controller, frames, Queue):
     multiprocessing.Process.__init__(self)
     self.controller = controller
-    self.create_canvas = controller.create_canvas[frames[0]%self.controller.numberRenderers]
     self.frames = frames
     self.args = controller.get_all_frame_args()[frames[0]::self.controller.numberRenderers]
     self.Queue = Queue
@@ -621,6 +620,7 @@ class AnimationRenderFrame(multiprocessing.Process):
   def run(self):
     self._really_used = [] 
     self._backend_kargs = []
+    create_canvas = self.controller.initialize_create_canvas()
     for i,frameNumber in enumerate(self.frames):
       if self._really_used!=[]:
         for j,a in enumerate(self.args[i]):
@@ -628,7 +628,7 @@ class AnimationRenderFrame(multiprocessing.Process):
           kargs = self._backend_kargs
       else:
         kargs = []
-      displays,pix = self.controller.render_frame(self.args[i], frameNumber, kargs, self.create_canvas)
+      displays,pix = self.controller.render_frame(self.args[i], frameNumber, kargs, create_canvas)
       self.Queue.put(pix)
       if self._really_used==[]:
         for d in displays:
@@ -645,7 +645,7 @@ class AnimationCreate(StoppableThread):
     self.controller = controller
 
   def run(self):
-    self.controller.initialize_create_canvas()
+    #self.controller.initialize_create_canvas()
     self.controller.set_anim_min_max()
     all_args = self.controller.get_all_frame_args()
     self.controller.reset_file_paths()
@@ -658,6 +658,7 @@ class AnimationCreate(StoppableThread):
       Queue = multiprocessing.Queue()
       for j in range(min(self.controller.numberRenderers,len(all_args))):
         AFrame.append(  AnimationRenderFrame(self.controller,range(j,len(all_args),self.controller.numberRenderers),Queue) )
+        AFrame[j].daemon = True
         AFrame[j].start()
       ## Now wait for these 5 frames to be rendered before moving on
       for j in range(min(self.controller.numberRenderers,len(all_args))):
@@ -742,8 +743,6 @@ class AnimationPlayback(StoppableThread):
       self.controller.signals.stopped.emit(True)
 
 class AnimationController(animate_obj_old):
-  def __del__(self):
-    print "We come here to delete crap"
   def __init__(self, vcs_self):
     animate_obj_old.__init__(self, vcs_self)
     self.create_thread = None
@@ -827,8 +826,6 @@ class AnimationController(animate_obj_old):
     return len(self.animation_files)
 
   def initialize_create_canvas(self):
-    self.create_canvas=[]
-    for i in range(self.numberRenderers):
       # create a new canvas for each frame
       create_canvas = vcs.init()
       create_canvas.setcolormap(self.vcs_self.getcolormapname())
@@ -844,7 +841,7 @@ class AnimationController(animate_obj_old):
       create_canvas.setbgoutputdimensions(width=dims['width']*factor,
                                           height=dims['height']*factor,
                                           units='pixel')
-      self.create_canvas.append(create_canvas)
+      return create_canvas
     
   def set_anim_min_max(self):
     # Save the min and max values for the graphics methods.
