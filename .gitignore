@@ -56,3 +56,4 @@ logs/
 site.cfg
 sources/
 version
+.idea/
