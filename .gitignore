@@ -57,4 +57,7 @@ site.cfg
 sources/
 version
 .idea/
-
+*.pyo
+14-12-02/
+installation/install.py
+*.xml
